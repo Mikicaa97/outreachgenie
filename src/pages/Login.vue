@@ -23,7 +23,7 @@
     <img
         src="/src/assets/OutreachGenie-Logo.png"
         alt="OutreachGenie Logo"
-        class="w-28 sm:w-32 md:w-40 lg:w-48 xl:w-56 mb-6 mx-auto object-contain"
+        class="w-28 sm:w-32 md:w-40 lg:w-48 xl:w-24 mb-6 mx-auto object-contain"
     />
 
     <h2 class="text-2xl font-bold mb-4">{{ t('login_title') }}</h2>
