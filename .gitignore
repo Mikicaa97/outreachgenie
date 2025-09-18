@@ -1,0 +1,34 @@
+# env fajlovi
+.env
+.env.*.local
+*.env
+*.env.*
+
+# node/artefakti
+node_modules/
+dist/
+dist-ssr/
+.build/
+.cache/
+.vite/
+coverage/
+
+# logs/temp
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS/IDE fajlovi
+.DS_Store
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
