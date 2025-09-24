@@ -110,12 +110,23 @@
               <span>{{ t('dash_add_paragraphs') }}</span>
             </label>
 
-            <button type="submit"
-                    class="w-full text-white px-4 py-2 rounded"
-                    style="background:#00C786"
-                    :disabled="isLoading">
-              {{ isLoading ? t('dash_generating') : t('dash_send') }}
+            <button
+                type="submit"
+                class="w-full px-4 py-2 rounded text-white font-medium transition
+                 bg-[#00C786] hover:bg-[#00b277] active:scale-95
+                 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                :disabled="isLoading"
+            >
+              <span v-if="isLoading" class="flex items-center gap-2">
+                <!-- Animacija pulsa -->
+                <span class="w-4 h-4 rounded-full bg-white animate-pulse"></span>
+                {{ t('dash_generating') }}
+              </span>
+                          <span v-else>
+                {{ t('dash_send') }}
+              </span>
             </button>
+
             <div v-if="isLoading" class="text-center text-green-400 my-2 animate-pulse">
               {{ t('dash_generating_msg') }}
             </div>

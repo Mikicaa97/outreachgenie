@@ -28,8 +28,9 @@ export default async function handler(req, res) {
                 userId,
                 plan,
             },
-            success_url: 'http://localhost:5173/success',
-            cancel_url: 'http://localhost:5173/cancel',
+            success_url: `${process.env.FRONTEND_URL}/success`,
+            cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+
         })
 
         return res.status(200).json({ url: session.url })

@@ -3,7 +3,7 @@
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
 
       <p class="text-center sm:text-left">
-        {{t('footer_rights')}}
+        {{t('footer_rights')}} Development <a href="#!" class="text-yellow-400">Weboro</a>
       </p>
 
       <nav class="flex flex-wrap gap-4 justify-center">
