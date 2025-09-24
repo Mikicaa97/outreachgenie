@@ -416,7 +416,7 @@ const hasReachedLimit = async () => {
   if (profileError) return false
   if (profile?.plan === 'pro') return false
 
-  return (count ?? 0) >= 5
+  return (count ?? 0) >= 999
 }
 
 /** Filteri */
