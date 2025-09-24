@@ -173,6 +173,11 @@ app.post("/api/generate-message", async (req, res) => {
 
 // ✅ Serve Vue frontend (dist folder)
 const distPath = path.join(__dirname, "dist");
+console.log("Serving frontend from: ", distPath)
+app.get("/healthz", (req, res) => {
+    res.status(200).send("OK");
+});
+
 app.use(express.static(distPath));
 app.get("*", (req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
@@ -180,6 +185,7 @@ app.get("*", (req, res) => {
 
 // ✅ Pokretanje servera
 const PORT = process.env.PORT || 3000;
+console.log("✅ Environment variables:", process.env.FRONTEND_URL, process.env.SUPABASE_URL);
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
