@@ -3,58 +3,64 @@
     <!-- 🟣 Test mode baner -->
     <div
         v-if="showTestBanner"
-        class="bg-purple-600 text-white text-center px-4 py-2 flex items-center justify-between text-xs sm:text-sm"
+        class="bg-purple-600 text-white text-center px-3 py-2 flex items-center justify-between text-xs sm:text-sm"
     >
-      <p>
+      <p class="flex-1 text-center">
         🚀 {{ t('landing.testMode') }}
         <span class="underline font-semibold">{{ t('landing.unlimitedEmails') }}</span>
       </p>
       <button
           @click="showTestBanner = false"
-          class="ml-4 text-white hover:text-gray-200 font-bold"
+          class="ml-2 text-white hover:text-gray-200 font-bold"
           aria-label="Zatvori"
       >
         ✕
       </button>
     </div>
 
+    <!-- Gornja traka -->
     <div class="max-w-6xl mx-auto px-3 py-2 flex items-center justify-between">
 
-      <!-- Plan badge -->
-      <div class="hidden sm:flex items-center gap-1 text-xs sm:text-sm">
+      <!-- Plan badge (desktop only) -->
+      <div class="sm:flex items-center gap-1 text-xs sm:text-sm">
         {{ t('header_plan') }}:
         <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">
-          {{ userPlan || '—' }}
-        </span>
+        {{ userPlan || '—' }}
+      </span>
       </div>
 
+      <!-- Logo -->
       <router-link to="/" class="flex-1 flex justify-center">
         <img
             src="/src/assets/outreachgenielogo.png"
             alt="OutreachGenie Logo"
-            class="max-w-[100px] sm:max-w-[160px] md:max-w-[140px] lg:max-w-[150px] xl:max-w-[120px] h-auto mt-1 object-contain"
+            class="max-h-20 sm:max-h-20 object-contain"
         />
       </router-link>
 
       <!-- Right side (Admin + Language Switcher) -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <template v-if="user?.is_admin">
           <RouterLink
               to="/admin"
-              class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-sm"
+              class="hidden sm:block bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-xs sm:text-sm"
           >
             🛠 {{ t('header_admin') }}
           </RouterLink>
         </template>
 
         <!-- Language switch -->
-        <select v-model="selectedLang" @change="changeLang" class="bg-gray-800 text-white px-2 py-1 rounded text-xs">
+        <select
+            v-model="selectedLang"
+            @change="changeLang"
+            class="bg-gray-800 text-white px-2 py-1 rounded text-xs"
+        >
           <option value="sr">SR</option>
           <option value="en">EN</option>
         </select>
       </div>
 
-      <!-- Navigation -->
+      <!-- Desktop navigation -->
       <nav class="hidden md:flex items-center gap-2 ml-4">
         <button @click="navigateTo('home')" class="px-3 py-1 rounded hover:bg-gray-800 transition">{{ t('header_generator') }}</button>
         <button @click="navigateTo('profile')" class="px-3 py-1 rounded hover:bg-gray-800 transition">{{ t('header_profile') }}</button>
@@ -63,7 +69,7 @@
       </nav>
 
       <!-- Mobile menu button -->
-      <div class="md:hidden">
+      <div class="md:hidden ml-2">
         <button
             @click="open = !open"
             class="p-2 rounded hover:bg-gray-800 transition"
@@ -77,21 +83,23 @@
 
     <!-- Mobile dropdown -->
     <div v-if="open" class="md:hidden border-t border-gray-800">
-      <div class="max-w-6xl mx-auto px-3 py-2 flex flex-col gap-2">
+      <div class="max-w-6xl mx-auto px-3 py-3 flex flex-col gap-2">
 
-        <!-- Plan prikaz -->
-        <div class="sm:hidden text-xs text-gray-300 mb-1 flex items-center gap-1">
+        <!-- Plan prikaz (mobile only) -->
+        <div class="sm:hidden text-xs text-gray-300 mb-2 flex items-center gap-1">
           {{ t('header_plan') }}:
           <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">
-            {{ userPlan || '—' }}
-          </span>
+          {{ userPlan || '—' }}
+        </span>
         </div>
 
+        <!-- Nav links -->
         <button @click="navigateTo('home'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_generator') }}</button>
         <button @click="navigateTo('profile'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_profile') }}</button>
         <SubscribeButton />
         <button @click="logout" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_logout') }}</button>
 
+        <!-- Admin link (mobile only) -->
         <template v-if="user?.is_admin">
           <RouterLink
               to="/admin"
@@ -102,7 +110,11 @@
         </template>
 
         <!-- Language switch mobile -->
-        <select v-model="selectedLang" @change="changeLang" class="bg-gray-800 text-white px-2 py-1 rounded text-xs mt-2">
+        <select
+            v-model="selectedLang"
+            @change="changeLang"
+            class="bg-gray-800 text-white px-2 py-1 rounded text-xs mt-3"
+        >
           <option value="sr">SR</option>
           <option value="en">EN</option>
         </select>
