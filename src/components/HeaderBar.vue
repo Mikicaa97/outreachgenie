@@ -86,7 +86,7 @@
       <div class="max-w-6xl mx-auto px-3 py-3 flex flex-col gap-2">
 
         <!-- Plan prikaz (mobile only) -->
-        <div class="sm:hidden text-xs text-gray-300 mb-2 flex items-center gap-1">
+        <div class="hidden text-xs text-gray-300 mb-2 flex items-center gap-1">
           {{ t('header_plan') }}:
           <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">
           {{ userPlan || '—' }}
