@@ -250,6 +250,9 @@
   "cookies_reject": "Reject",
   "cookies_accept": "Accept",
 
+  "test_version_title": "🚀 Test version",
+  "test_version_text": "This is a <strong>test version</strong> – you have <span class='text-green-400 font-semibold'>unlimited usage</span> during the test phase.",
+  "close": "Close",
 
   "footer_rights": "© 2025 OutreachGenie. All rights reserved.",
   "footer_nav_features": "Features",

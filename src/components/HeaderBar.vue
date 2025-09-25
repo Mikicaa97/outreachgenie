@@ -81,45 +81,91 @@
       </div>
     </div>
 
-    <!-- Mobile dropdown -->
-    <div v-if="open" class="md:hidden border-t border-gray-800">
-      <div class="max-w-6xl mx-auto px-3 py-3 flex flex-col gap-2">
+    <transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-4"
+    >
+      <div v-if="open" class="md:hidden border-t border-gray-800">
+        <div class="max-w-6xl mx-auto px-3 py-3 flex flex-col gap-2">
 
-        <!-- Plan prikaz (mobile only) -->
-        <div class="hidden text-xs text-gray-300 mb-2 flex items-center gap-1">
-          {{ t('header_plan') }}:
-          <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">
+          <!-- Plan prikaz (mobile only) -->
+          <div class="hidden text-xs text-gray-300 mb-2 flex items-center gap-1">
+            {{ t('header_plan') }}:
+            <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">
           {{ userPlan || '—' }}
         </span>
-        </div>
+          </div>
 
-        <!-- Nav links -->
-        <button @click="navigateTo('home'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_generator') }}</button>
-        <button @click="navigateTo('profile'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_profile') }}</button>
-        <SubscribeButton />
-        <button @click="logout" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_logout') }}</button>
+          <!-- Nav links -->
+          <button @click="navigateTo('home'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_generator') }}</button>
+          <button @click="navigateTo('profile'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_profile') }}</button>
+          <SubscribeButton />
+          <button @click="logout" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_logout') }}</button>
 
-        <!-- Admin link (mobile only) -->
-        <template v-if="user?.is_admin">
-          <RouterLink
-              to="/admin"
-              class="w-full text-left px-3 py-2 rounded hover:bg-gray-800 text-blue-400"
+          <!-- Admin link (mobile only) -->
+          <template v-if="user?.is_admin">
+            <RouterLink
+                to="/admin"
+                class="w-full text-left px-3 py-2 rounded hover:bg-gray-800 text-blue-400"
+            >
+              🛠 {{ t('header_admin') }}
+            </RouterLink>
+          </template>
+
+          <!-- Language switch mobile -->
+          <select
+              v-model="selectedLang"
+              @change="changeLang"
+              class="bg-gray-800 text-white px-2 py-1 rounded text-xs mt-3"
           >
-            🛠 {{ t('header_admin') }}
-          </RouterLink>
-        </template>
-
-        <!-- Language switch mobile -->
-        <select
-            v-model="selectedLang"
-            @change="changeLang"
-            class="bg-gray-800 text-white px-2 py-1 rounded text-xs mt-3"
-        >
-          <option value="sr">SR</option>
-          <option value="en">EN</option>
-        </select>
+            <option value="sr">SR</option>
+            <option value="en">EN</option>
+          </select>
+        </div>
       </div>
-    </div>
+    </transition>
+<!--    <div v-if="open" class="md:hidden border-t border-gray-800">-->
+<!--      <div class="max-w-6xl mx-auto px-3 py-3 flex flex-col gap-2">-->
+
+<!--        &lt;!&ndash; Plan prikaz (mobile only) &ndash;&gt;-->
+<!--        <div class="hidden text-xs text-gray-300 mb-2 flex items-center gap-1">-->
+<!--          {{ t('header_plan') }}:-->
+<!--          <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">-->
+<!--          {{ userPlan || '—' }}-->
+<!--        </span>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Nav links &ndash;&gt;-->
+<!--        <button @click="navigateTo('home'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_generator') }}</button>-->
+<!--        <button @click="navigateTo('profile'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_profile') }}</button>-->
+<!--        <SubscribeButton />-->
+<!--        <button @click="logout" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_logout') }}</button>-->
+
+<!--        &lt;!&ndash; Admin link (mobile only) &ndash;&gt;-->
+<!--        <template v-if="user?.is_admin">-->
+<!--          <RouterLink-->
+<!--              to="/admin"-->
+<!--              class="w-full text-left px-3 py-2 rounded hover:bg-gray-800 text-blue-400"-->
+<!--          >-->
+<!--            🛠 {{ t('header_admin') }}-->
+<!--          </RouterLink>-->
+<!--        </template>-->
+
+<!--        &lt;!&ndash; Language switch mobile &ndash;&gt;-->
+<!--        <select-->
+<!--            v-model="selectedLang"-->
+<!--            @change="changeLang"-->
+<!--            class="bg-gray-800 text-white px-2 py-1 rounded text-xs mt-3"-->
+<!--        >-->
+<!--          <option value="sr">SR</option>-->
+<!--          <option value="en">EN</option>-->
+<!--        </select>-->
+<!--      </div>-->
+<!--    </div>-->
   </header>
 </template>
 

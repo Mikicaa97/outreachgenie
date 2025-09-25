@@ -253,6 +253,10 @@
   "cookies_reject": "Odbijam",
   "cookies_accept": "Prihvatam",
 
+  "test_version_title": "🚀 Test verzija",
+  "test_version_text": "Ovo je <strong>test verzija</strong> – imate <span class='text-green-400 font-semibold'>neograničeno korišćenje</span> dok traje test faza.",
+  "close": "Zatvori",
+
   "footer_rights": "© 2025 OutreachGenie. Sva prava zadržana.",
     "footer_nav_features": "Karakteristike",
     "footer_nav_pricing": "Cene",
