@@ -1,6 +1,6 @@
 <template>
   <div
-      class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-white px-4"
+      class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-white px-4 pb-4"
       :style="{ backgroundImage: `url(${bgImage})` }"
   >
     <!-- overlay -->
@@ -36,6 +36,20 @@
       <h2 class="text-2xl font-bold mb-4 text-center">{{ t('signup_title') }}</h2>
 
       <div class="space-y-4">
+        <input
+            v-model="firstName"
+            type="text"
+            :placeholder="t('signup_first_name') || 'First name'"
+            class="w-full p-2 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-400"
+        />
+
+        <input
+            v-model="lastName"
+            type="text"
+            :placeholder="t('signup_last_name') || 'Last name'"
+            class="w-full p-2 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-400"
+        />
+
         <input
             v-model="email"
             type="email"
@@ -81,34 +95,54 @@ const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
+// polja
 const email = ref('')
 const password = ref('')
+const firstName = ref('')
+const lastName = ref('')
 
 const changeLang = (lang) => {
   locale.value = lang
 }
 
 const register = async () => {
-  if (!email.value || !password.value) {
-    alert(t('signup_error_fields'))
+  if (!email.value || !password.value || !firstName.value || !lastName.value) {
+    alert(t('signup_error_fields') || 'Please fill in all fields.')
     return
   }
 
   if (password.value.length < 6) {
-    alert(t('signup_error_short'))
+    alert(t('signup_error_short') || 'Password must be at least 6 characters.')
     return
   }
 
-  const { error } = await supabase.auth.signUp({
+  // 1️⃣ Registracija u Supabase Auth
+  const { data, error } = await supabase.auth.signUp({
     email: email.value,
     password: password.value,
   })
 
   if (error) {
     alert(t('signup_error_general') + error.message)
-  } else {
-    alert(t('signup_success'))
+    return
   }
+
+  // 2️⃣ Ako je registrovan korisnik, sačuvaj ime i prezime u user_profiles
+  if (data.user) {
+    const { error: profileError } = await supabase
+        .from('user_profiles')
+        .update({
+          first_name: firstName.value,
+          last_name: lastName.value,
+        })
+        .eq('id', data.user.id)
+
+    if (profileError) {
+      console.error('❌ Greška pri upisu imena i prezimena:', profileError.message)
+    }
+  }
+
+  alert(t('signup_success') || 'Check your email to confirm your account.')
 }
 
 onMounted(() => {

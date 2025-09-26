@@ -116,6 +116,8 @@
   "error_message": "Došlo je do greške. Pokušaj ponovo.",
 
   "signup_title": "Registruj se",
+  "signup_first_name": "Ime",
+  "signup_last_name": "Prezime",
   "signup_email": "Email",
   "signup_password": "Lozinka (min. 6 karaktera)",
   "signup_button": "Registruj se",

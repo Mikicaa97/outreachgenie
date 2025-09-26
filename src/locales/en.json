@@ -113,6 +113,8 @@
   "error_message": "An error occurred. Please try again.",
 
   "signup_title": "Sign Up",
+  "signup_first_name": "First name",
+  "signup_last_name": "Last name",
   "signup_email": "Email",
   "signup_password": "Password (min. 6 characters)",
   "signup_button": "Sign Up",

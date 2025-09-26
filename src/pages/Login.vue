@@ -1,6 +1,6 @@
 <template>
   <div
-      class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-white px-4"
+      class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-white px-4 pb-4"
       :style="{ backgroundImage: `url(${bgImage})` }"
   >
     <!-- overlay (ako hoćeš da zatamniš sliku) -->
