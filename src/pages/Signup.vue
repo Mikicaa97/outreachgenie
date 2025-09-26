@@ -1,7 +1,7 @@
 <template>
   <div
-      class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-white px-4 bg-[length:cover] bg-center"
-      style="background-image: url('/src/assets/login-signup-background.jpg');"
+      class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-white px-4"
+      :style="{ backgroundImage: `url(${bgImage})` }"
   >
     <!-- overlay -->
     <div class="absolute inset-0 bg-black/70"></div>
@@ -75,6 +75,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '../supabase.js'
 import { useI18n } from 'vue-i18n'
+import bgImage from '@/assets/login-signup-background.jpg'
 
 const { t, locale } = useI18n()
 const route = useRoute()
