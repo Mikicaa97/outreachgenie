@@ -257,6 +257,24 @@
   "test_version_text": "Ovo je <strong>test verzija</strong> – imate <span class='text-green-400 font-semibold'>neograničeno korišćenje</span> dok traje test faza.",
   "close": "Zatvori",
 
+  "auth_forgot_password": "Zaboravili ste lozinku?",
+  "auth_reset_title": "Resetuj lozinku",
+  "auth_send_link": "Pošalji link",
+  "auth_reset_sent": "Ako postoji nalog sa ovom adresom, poslali smo link za reset lozinke.",
+  "auth_reset_error": "Nešto nije u redu. Pokušaj ponovo.",
+  "auth_email_required": "Unesite email adresu.",
+
+  "auth_set_new_password": "Postavi novu lozinku",
+  "auth_new_password_ph": "Nova lozinka",
+  "auth_confirm_password_ph": "Potvrdi lozinku",
+  "auth_passwords_mismatch": "Lozinke se ne poklapaju.",
+  "auth_password_updated": "Lozinka je uspešno promenjena. Preusmeravanje na prijavu...",
+  "auth_set_password_btn": "Sačuvaj lozinku",
+
+  "saving": "Čuvanje...",
+  "close": "Zatvori",
+  "something_wrong": "Došlo je do greške.",
+
   "footer_rights": "© 2025 OutreachGenie. Sva prava zadržana.",
     "footer_nav_features": "Karakteristike",
     "footer_nav_pricing": "Cene",

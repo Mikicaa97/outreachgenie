@@ -11,6 +11,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy.vue'
 import TermsOfService from '@/pages/TermsOfService.vue'
 import CookiesPolicy from '@/pages/CookiesPolicy.vue'
 import Contact from '@/pages/Contact.vue'
+import UpdatePassword from '@/views/UpdatePassword.vue'
 
 const routes = [
     {
@@ -55,7 +56,7 @@ const routes = [
     { path: '/terms', name: 'TermsOfService', component: TermsOfService },
     { path: '/cookies', name: 'CookiesPolicy', component: CookiesPolicy },
     { path: '/contact', name: 'Contact', component: Contact },
-
+    { path: '/update-password', name: 'update-password', component: UpdatePassword },
 ]
 
 const router = createRouter({

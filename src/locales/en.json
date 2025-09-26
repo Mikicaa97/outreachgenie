@@ -254,6 +254,24 @@
   "test_version_text": "This is a <strong>test version</strong> – you have <span class='text-green-400 font-semibold'>unlimited usage</span> during the test phase.",
   "close": "Close",
 
+  "auth_forgot_password": "Forgot your password?",
+  "auth_reset_title": "Reset password",
+  "auth_send_link": "Send reset link",
+  "auth_reset_sent": "If an account exists with this email, we've sent a reset link.",
+  "auth_reset_error": "Something went wrong. Try again.",
+  "auth_email_required": "Please enter your email.",
+
+  "auth_set_new_password": "Set a new password",
+  "auth_new_password_ph": "New password",
+  "auth_confirm_password_ph": "Confirm password",
+  "auth_passwords_mismatch": "Passwords do not match.",
+  "auth_password_updated": "Password updated successfully. Redirecting to login...",
+  "auth_set_password_btn": "Save password",
+
+  "saving": "Saving...",
+  "close": "Close",
+  "something_wrong": "Something went wrong.",
+
   "footer_rights": "© 2025 OutreachGenie. All rights reserved.",
   "footer_nav_features": "Features",
   "footer_nav_pricing": "Pricing",
