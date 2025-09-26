@@ -1,6 +1,6 @@
 <template>
   <div
-      class="relative flex flex-col items-center justify-center min-h-screen text-white px-4 bg-cover bg-center bg-no-repeat"
+      class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-white px-4"
       style="background-image: url('/src/assets/login-signup-background.jpg');"
   >
     <!-- overlay -->
