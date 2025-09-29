@@ -312,7 +312,7 @@ const servicePlaceholderExamples = {
 }
 
 /** Dinamični placeholderi u formi */
-watch(emailType, (newType) => {
+watch(emailType, () => {
   offer_text.value = ''
   service.value = ''
 })
@@ -348,7 +348,11 @@ const loadUserPlan = async () => {
       .eq('id', session.value.user.id)
       .single()
 
-  if (!error && data) userPlan.value = data.plan
+  if (error) {
+    console.error("❌ Greška pri učitavanju plana:", error.message)
+  } else {
+    userPlan.value = data.plan
+  }
 }
 
 /** Učitavanje poruka */
@@ -360,7 +364,11 @@ const loadMessages = async () => {
       .eq('user_id', session.value.user.id)
       .order('created_at', { ascending: false })
 
-  if (!error) messages.value = [...data]
+  if (error) {
+    console.error("❌ Greška pri učitavanju poruka:", error.message)
+  } else {
+    messages.value = [...data]
+  }
 }
 
 /** Edit */
@@ -378,7 +386,11 @@ const deleteMessage = async (id) => {
   if (!confirmed) return
 
   const { error } = await supabase.from('outreach_messages').delete().eq('id', id)
-  if (!error) messages.value = messages.value.filter(m => m.id !== id)
+  if (error) {
+    console.error("❌ Greška pri brisanju:", error.message)
+  } else {
+    messages.value = messages.value.filter(m => m.id !== id)
+  }
 }
 
 /** Refine */
@@ -413,10 +425,14 @@ const saveRefinedAsNew = async () => {
     offer_text: aiMessage,
     type: refineType.value,
     tone: refineTone.value,
-    user_id: session.value.user.id
+    user_id: session.value.user.id,
+    created_at: new Date().toISOString()
   }])
 
-  if (!error) {
+  if (error) {
+    console.error("❌ Greška pri insertu (saveRefinedAsNew):", error.message)
+    alert("Greška pri upisu: " + error.message)
+  } else {
     showRefine.value = false
     refiningMessageId.value = null
     await loadMessages()
@@ -446,7 +462,10 @@ const saveRefinedReplace = async () => {
       .eq('id', refiningMessageId.value)
       .eq('user_id', session.value.user.id)
 
-  if (!error) {
+  if (error) {
+    console.error("❌ Greška pri update:", error.message)
+    alert("Greška pri izmeni: " + error.message)
+  } else {
     messages.value = messages.value.map(m =>
         m.id === refiningMessageId.value
             ? { ...m, offer_text: aiMessage, type: refineType.value, tone: refineTone.value }
@@ -495,10 +514,14 @@ const submitForm = async () => {
       offer_text: aiMessage,
       type: emailType.value,
       tone: tone.value,
-      user_id: user.id
+      user_id: user.id,
+      created_at: new Date().toISOString()
     }])
 
-    if (!error) {
+    if (error) {
+      console.error("❌ Greška pri insertu (submitForm):", error.message)
+      alert("Greška pri upisu: " + error.message)
+    } else {
       full_name.value = ''
       company.value = ''
       service.value = ''
@@ -507,7 +530,7 @@ const submitForm = async () => {
       await loadMessages()
     }
   } catch (err) {
-    console.error('Greška u OpenAI:', err)
+    console.error('❌ Greška u OpenAI:', err)
   } finally {
     isLoading.value = false
   }
@@ -532,3 +555,4 @@ onMounted(async () => {
   }
 })
 </script>
+

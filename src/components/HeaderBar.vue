@@ -107,16 +107,6 @@
               🛠 {{ t('header_admin') }}
             </RouterLink>
           </template>
-
-          <!-- Language switch mobile -->
-          <select
-              v-model="selectedLang"
-              @change="changeLang"
-              class="bg-gray-800 text-white px-2 py-1 rounded text-xs mt-3"
-          >
-            <option value="sr">SR</option>
-            <option value="en">EN</option>
-          </select>
         </div>
       </div>
     </transition>
@@ -143,13 +133,6 @@ const switchLang = () => {
   locale.value = locale.value === 'sr' ? 'en' : 'sr'
 }
 
-// onMounted(() => {
-//   const savedLang = localStorage.getItem('lang')
-//   if (savedLang) {
-//     selectedLang.value = savedLang
-//     locale.value = savedLang
-//   }
-// })
 
 // Navigacija
 function navigateTo(view) {
