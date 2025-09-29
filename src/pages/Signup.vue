@@ -64,19 +64,23 @@
         />
         <button
             @click="register"
-            class="bg-purple-600 w-full py-2 rounded font-semibold hover:bg-purple-700 transition"
+            class="bg-purple-600 w-full py-2 rounded font-semibold hover:bg-purple-700 transition cursor-pointer"
         >
           {{ t('signup_button') }}
         </button>
 
+        <!-- ✅ Poruke -->
+        <p v-if="errorMsg" class="text-red-400 text-sm mt-3 text-center">{{ errorMsg }}</p>
+        <p v-if="successMsg" class="text-green-400 text-sm mt-3 text-center">{{ successMsg }}</p>
+
         <router-link
             to="/login"
-            class="text-sm underline text-purple-300 block text-center"
+            class="text-sm underline text-purple-300 block text-center cursor-pointer"
         >{{ t('signup_have_account') }}</router-link>
 
         <router-link
             to="/"
-            class="text-sm underline text-purple-300 block text-center"
+            class="text-sm underline text-purple-300 block text-center cursor-pointer"
         >{{ t('signup_back_site') }}</router-link>
       </div>
     </div>
@@ -101,18 +105,25 @@ const password = ref('')
 const firstName = ref('')
 const lastName = ref('')
 
+// obaveštenja
+const errorMsg = ref('')
+const successMsg = ref('')
+
 const changeLang = (lang) => {
   locale.value = lang
 }
 
 const register = async () => {
+  errorMsg.value = ''
+  successMsg.value = ''
+
   if (!email.value || !password.value || !firstName.value || !lastName.value) {
-    alert(t('signup_error_fields') || 'Please fill in all fields.')
+    errorMsg.value = t('signup_error_fields') || 'Please fill in all fields.'
     return
   }
 
   if (password.value.length < 6) {
-    alert(t('signup_error_short') || 'Password must be at least 6 characters.')
+    errorMsg.value = t('signup_error_short') || 'Password must be at least 6 characters.'
     return
   }
 
@@ -120,14 +131,20 @@ const register = async () => {
   const { data, error } = await supabase.auth.signUp({
     email: email.value,
     password: password.value,
+    options: {
+      data: {
+        first_name: firstName.value,
+        last_name: lastName.value
+      }
+    }
   })
 
   if (error) {
-    alert(t('signup_error_general') + error.message)
+    errorMsg.value = (t('signup_error_general') || 'Error during signup: ') + error.message
     return
   }
 
-  // 2️⃣ Ako je registrovan korisnik, sačuvaj ime i prezime u user_profiles
+  // 2️⃣ Ako je registrovan korisnik, ažuriraj first_name i last_name
   if (data.user) {
     const { error: profileError } = await supabase
         .from('user_profiles')
@@ -135,14 +152,15 @@ const register = async () => {
           first_name: firstName.value,
           last_name: lastName.value,
         })
-        .eq('id', data.user.id)
+        .eq('id', data.user.id)   // ažurira samo njegov red
+        .select()
 
     if (profileError) {
       console.error('❌ Greška pri upisu imena i prezimena:', profileError.message)
     }
   }
 
-  alert(t('signup_success') || 'Check your email to confirm your account.')
+  successMsg.value = t('signup_success') || 'Check your email to confirm your account.'
 }
 
 onMounted(() => {

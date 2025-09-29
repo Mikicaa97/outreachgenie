@@ -21,12 +21,13 @@
     <!-- Gornja traka -->
     <div class="max-w-6xl mx-auto px-3 py-2 flex items-center justify-between">
 
-      <!-- Plan badge (desktop only) -->
-      <div class="sm:flex items-center gap-1 text-xs sm:text-sm">
+      <!-- Plan badge + ime -->
+      <div class="sm:flex items-center gap-2 text-xs sm:text-sm">
         {{ t('header_plan') }}:
         <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">
-        {{ userPlan || '—' }}
-      </span>
+          {{ userPlan || '—' }}
+        </span>
+        <span v-if="userName" class="ml-2 text-gray-400">| {{ userName }}</span>
       </div>
 
       <!-- Logo -->
@@ -81,6 +82,7 @@
       </div>
     </div>
 
+    <!-- Mobile navigation -->
     <transition
         enter-active-class="transition duration-300 ease-out"
         enter-from-class="opacity-0 -translate-y-4"
@@ -91,14 +93,6 @@
     >
       <div v-if="open" class="md:hidden border-t border-gray-800">
         <div class="max-w-6xl mx-auto px-3 py-3 flex flex-col gap-2">
-
-          <!-- Plan prikaz (mobile only) -->
-          <div class="hidden text-xs text-gray-300 mb-2 flex items-center gap-1">
-            {{ t('header_plan') }}:
-            <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">
-          {{ userPlan || '—' }}
-        </span>
-          </div>
 
           <!-- Nav links -->
           <button @click="navigateTo('home'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_generator') }}</button>
@@ -128,44 +122,6 @@
         </div>
       </div>
     </transition>
-<!--    <div v-if="open" class="md:hidden border-t border-gray-800">-->
-<!--      <div class="max-w-6xl mx-auto px-3 py-3 flex flex-col gap-2">-->
-
-<!--        &lt;!&ndash; Plan prikaz (mobile only) &ndash;&gt;-->
-<!--        <div class="hidden text-xs text-gray-300 mb-2 flex items-center gap-1">-->
-<!--          {{ t('header_plan') }}:-->
-<!--          <span :class="['px-2 py-1 rounded text-white font-semibold', planBadgeColor(userPlan)]">-->
-<!--          {{ userPlan || '—' }}-->
-<!--        </span>-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; Nav links &ndash;&gt;-->
-<!--        <button @click="navigateTo('home'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_generator') }}</button>-->
-<!--        <button @click="navigateTo('profile'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_profile') }}</button>-->
-<!--        <SubscribeButton />-->
-<!--        <button @click="logout" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_logout') }}</button>-->
-
-<!--        &lt;!&ndash; Admin link (mobile only) &ndash;&gt;-->
-<!--        <template v-if="user?.is_admin">-->
-<!--          <RouterLink-->
-<!--              to="/admin"-->
-<!--              class="w-full text-left px-3 py-2 rounded hover:bg-gray-800 text-blue-400"-->
-<!--          >-->
-<!--            🛠 {{ t('header_admin') }}-->
-<!--          </RouterLink>-->
-<!--        </template>-->
-
-<!--        &lt;!&ndash; Language switch mobile &ndash;&gt;-->
-<!--        <select-->
-<!--            v-model="selectedLang"-->
-<!--            @change="changeLang"-->
-<!--            class="bg-gray-800 text-white px-2 py-1 rounded text-xs mt-3"-->
-<!--        >-->
-<!--          <option value="sr">SR</option>-->
-<!--          <option value="en">EN</option>-->
-<!--        </select>-->
-<!--      </div>-->
-<!--    </div>-->
   </header>
 </template>
 
@@ -179,18 +135,17 @@ import { useI18n } from 'vue-i18n'
 const router = useRouter()
 const open = ref(false)
 const userPlan = ref('')
+const userName = ref('')
 const user = ref(null)
 
 const { t, locale } = useI18n()
 const selectedLang = ref(locale.value)
 
-// Promeni jezik
 const changeLang = () => {
   locale.value = selectedLang.value
   localStorage.setItem('lang', selectedLang.value)
 }
 
-// Učitaj prethodno sačuvan jezik
 onMounted(() => {
   const savedLang = localStorage.getItem('lang')
   if (savedLang) {
@@ -232,21 +187,17 @@ onMounted(async () => {
   if (authUser) {
     const uid = authUser.id
 
-    // Plan
-    const { data: planData, error: planError } = await supabase
+    const { data: profile, error } = await supabase
         .from('user_profiles')
-        .select('plan')
-        .eq('id', uid)
-        .maybeSingle()
-    if (!planError && planData) userPlan.value = planData.plan
-
-    // Admin
-    const { data: adminData, error: adminError } = await supabase
-        .from('user_profiles')
-        .select('is_admin')
+        .select('plan, is_admin, first_name')
         .eq('id', uid)
         .single()
-    if (!adminError && adminData) user.value = adminData
+
+    if (!error && profile) {
+      userPlan.value = profile.plan
+      user.value = profile
+      userName.value = `${profile.first_name || ''}`.trim()
+    }
   }
 })
 </script>

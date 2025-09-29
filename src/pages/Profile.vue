@@ -3,7 +3,7 @@
     <div class="max-w-6xl mx-auto text-white">
       <!-- Naslov -->
       <h2 class="text-1xl font-bold mb-4">
-        <span class="text-gray-400">{{ t('profile_greeting') }}, {{ email }}</span>
+        <span class="text-gray-400">{{ t('profile_greeting') }}, {{ name }}</span>
       </h2>
 
       <!-- Kartica sa planom -->
@@ -73,6 +73,7 @@ const props = defineProps({
   session: { type: Object, required: true }
 })
 
+const name = ref('-')
 const email = ref('—')
 const plan = ref('free')
 const usedToday = ref(0)
@@ -95,34 +96,35 @@ const planLabel = computed(() => {
   }
 })
 
-const loadProfile = async () => {
-  const user = props.session.user
-  if (!user) return
-
+const loadProfile = async (uid) => {
   const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('plan')
-      .eq('id', user.id)
+      .select('plan, first_name, email')
+      .eq('id', uid)
       .single()
 
   if (!profileError && profile) {
     plan.value = profile.plan || 'free'
+    name.value = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+    email.value = profile.email || '—'
   }
 
+  // Ukupno poslate poruke
   const { count: total, error: totalError } = await supabase
       .from('outreach_messages')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
 
   if (!totalError) {
     totalMessages.value = total || 0
   }
 
+  // Poslate danas
   const todayIso = new Date().toISOString().split('T')[0]
   const { count, error } = await supabase
       .from('outreach_messages')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
       .gte('created_at', todayIso)
 
   if (!error) {
@@ -134,8 +136,7 @@ const loadProfile = async () => {
 
 watch(() => props.session, async (newSession) => {
   if (newSession?.user) {
-    email.value = newSession.user.email
-    await loadProfile()
+    await loadProfile(newSession.user.id)
   }
 }, { immediate: true })
 </script>

@@ -120,6 +120,7 @@
   "signup_button": "Sign Up",
   "signup_have_account": "Already have an account? Log in",
   "signup_back_site": "Back to site",
+
   "signup_error_fields": "Please enter email and password.",
   "signup_error_short": "Password must be at least 6 characters.",
   "signup_error_general": "Registration error: ",
@@ -133,8 +134,9 @@
   "login_back_site": "Back to site",
   "login_error": "Login error: ",
 
-  "dash_title": "Write cold emails that win clients – powered by AI.",
+  "dash_title": "Whether you're looking for new clients or sending a simple email – AI helps you write a message that stands out.",
   "dash_search_placeholder": "Search by text / company / name...",
+  "dash_generate_title": "Generate your email..",
   "dash_filter_all": "All types",
   "dash_type_label": "Message type:",
   "dash_type_general": "General",

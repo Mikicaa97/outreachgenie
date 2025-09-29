@@ -123,11 +123,11 @@
   "signup_button": "Registruj se",
   "signup_have_account": "Imate nalog? Prijavite se",
   "signup_back_site": "Vrati se na sajt",
+
   "signup_error_fields": "Unesite email i lozinku.",
   "signup_error_short": "Lozinka mora imati najmanje 6 karaktera.",
   "signup_error_general": "Greška pri registraciji: ",
   "signup_success": "Uspešna registracija! Proverite email za potvrdu.",
-
 
   "login_title": "Prijavi se",
   "login_email": "Email",
@@ -137,8 +137,9 @@
   "login_back_site": "Vrati se na sajt",
   "login_error": "Greška pri prijavi: ",
 
-  "dash_title": "Piši cold emailove koji dobijaju klijente – pomoću AI-ja.",
+  "dash_title": "Bilo da tražiš nove klijente ili šalješ običan email – AI ti pomaže da napišeš poruku koja se pamti.",
   "dash_search_placeholder": "Pretraga po tekstu / kompaniji / imenu...",
+  "dash_generate_title": "Generiši svoj email..",
   "dash_filter_all": "Sve vrste",
   "dash_type_label": "Tip poruke:",
   "dash_type_general": "Opšti",
