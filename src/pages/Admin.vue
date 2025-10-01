@@ -29,13 +29,14 @@
       </div>
     </div>
 
-    <!-- Messages -->
+    <!-- Main Content -->
     <div class="w-full md:w-3/4 p-4 bg-white">
       <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Admin Panel</h1>
         <router-link to="/" class="text-blue-600 hover:underline">↩ Nazad u program</router-link>
       </div>
 
+      <!-- Poruke korisnika -->
       <div v-if="selectedUser">
         <h2 class="text-xl font-semibold mb-3">Poruke korisnika</h2>
         <div v-if="loading">Učitavanje poruka...</div>
@@ -57,8 +58,31 @@
           </div>
         </div>
       </div>
-      <div v-else>
-        <p class="text-gray-600">Odaberi korisnika sa leve strane da vidiš njegove poruke.</p>
+
+      <!-- ✅ Svi komentari svih korisnika -->
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-3">Svi komentari korisnika</h2>
+        <div v-if="allFeedbacks.length === 0" class="text-gray-500">
+          Nema komentara.
+        </div>
+        <div v-else>
+          <div
+              v-for="fb in allFeedbacks"
+              :key="fb.id"
+              class="border p-4 mb-4 rounded bg-gray-50 shadow-sm"
+          >
+            <p><strong>{{ fb.first_name }} {{ fb.last_name }}</strong></p>
+            <p>Komentar: {{ fb.message }}</p>
+            <p class="text-sm text-gray-500">
+              Kreirano: {{ new Date(fb.created_at).toLocaleString() }}
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <div v-if="!selectedUser">
+        <p class="text-gray-600 mt-6">Odaberi korisnika sa leve strane da vidiš njegove poruke.</p>
       </div>
     </div>
   </div>
@@ -74,6 +98,23 @@ const selectedUserPlan = ref('')
 const messages = ref([])
 const loading = ref(false)
 
+const allFeedbacks = ref([])
+
+/** ✅ Povuci sve komentare sa vezanim emailom iz user_profiles */
+const fetchAllFeedbacks = async () => {
+  const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('❌ Greška pri dohvatanju komentara:', error.message)
+  } else {
+    allFeedbacks.value = data
+  }
+}
+
+
 const fetchUsers = async () => {
   const { data, error } = await supabase
       .from('user_profiles')
@@ -83,11 +124,9 @@ const fetchUsers = async () => {
   if (error) {
     console.error('❌ Greška pri dohvatanju korisnika:', error.message)
   } else {
-    console.log('📥 Dobijeni korisnici:', data)
     users.value = data
   }
 }
-
 
 const fetchMessagesForUser = async (userId) => {
   if (!userId) return
@@ -145,6 +184,7 @@ const deleteMessage = async (messageId) => {
 
 onMounted(() => {
   fetchUsers()
+  fetchAllFeedbacks()
 })
 </script>
 

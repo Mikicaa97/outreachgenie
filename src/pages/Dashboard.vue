@@ -6,7 +6,7 @@
     <TestBanner />
 
     <div v-if="currentView === 'home'" class="p-6 w-full mx-auto">
-      <h1 class="text-xl text-center font-bold mb-8 animate-pulse">
+      <h1 class="text-sm text-center font-bold mb-8 animate-pulse">
         {{ t('dash_title') }}
       </h1>
 
@@ -227,6 +227,22 @@
           </div>
         </div>
       </transition>
+      <div class="max-w-6xl mx-auto mt-10 bg-gray border border-gray-700 p-4 rounded">
+        <h2 class="text-lg font-semibold mb-3">Pomozi nam da poboljšamo naš alat</h2>
+        <textarea
+            v-model="feedbackMessage"
+            placeholder="Ostavi svoj komentar ili predlog..."
+            class="w-full p-2 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-400"
+        ></textarea>
+        <button
+            @click="submitFeedback"
+            class="mt-3 px-4 py-2 bg-[#00C786] hover:bg-[#00b277] rounded text-white font-medium"
+        >
+          Pošalji
+        </button>
+        <p v-if="feedbackSent" class="text-green-400 mt-2">Hvala na komentaru!</p>
+      </div>
+
     </div>
 
     <div v-else>
@@ -309,6 +325,44 @@ const servicePlaceholderExamples = {
   hiring: "HR tim ili kontakt osoba...",
   reminder: "Osoba koju podsećaš (npr. Jelena – sastanak u 10h)...",
   apology: "Osoba kojoj se izvinjavaš...",
+}
+
+const feedbackMessage = ref('')
+const feedbackSent = ref(false)
+
+const submitFeedback = async () => {
+  if (!session.value?.user) {
+    alert("Moraš biti prijavljen da bi ostavio komentar.")
+    return
+  }
+
+  if (!feedbackMessage.value.trim()) {
+    alert("Unesi komentar pre slanja.")
+    return
+  }
+
+  // Povuci ime i prezime iz tabele user_profiles
+  const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('first_name, last_name')
+      .eq('id', session.value.user.id)
+      .single()
+
+  const { error } = await supabase.from('feedback').insert([{
+    user_id: session.value.user.id,
+    first_name: profile?.first_name || '',
+    last_name: profile?.last_name || '',
+    message: feedbackMessage.value
+  }])
+
+  if (error) {
+    console.error("Greška pri upisu feedback-a:", error)
+    alert("Došlo je do greške. Pokušaj ponovo.")
+  } else {
+    feedbackMessage.value = ''
+    feedbackSent.value = true
+    setTimeout(() => (feedbackSent.value = false), 3000) // briše poruku posle 3s
+  }
 }
 
 /** Dinamični placeholderi u formi */
