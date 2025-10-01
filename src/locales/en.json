@@ -178,6 +178,11 @@
   "dash_refine_replace": "Save changes (replace)",
   "dash_refine_new": "Save as new",
 
+  "feedback_title": "Help us improve our tool",
+  "feedback_placeholder": "Leave your comment or suggestion...",
+  "feedback_button": "Submit",
+  "feedback_thanks": "Thanks for your feedback!",
+
   "header_plan": "Plan",
   "header_admin": "Admin Panel",
   "header_generator": "Generator",

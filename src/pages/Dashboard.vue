@@ -228,20 +228,26 @@
         </div>
       </transition>
       <div class="max-w-6xl mx-auto mt-10 bg-gray border border-gray-700 p-4 rounded">
-        <h2 class="text-lg font-semibold mb-3">Pomozi nam da poboljšamo naš alat</h2>
+        <h2 class="text-lg font-semibold mb-3">{{ $t('feedback_title') }}</h2>
+
         <textarea
             v-model="feedbackMessage"
-            placeholder="Ostavi svoj komentar ili predlog..."
+            :placeholder="$t('feedback_placeholder')"
             class="w-full p-2 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-400"
         ></textarea>
+
         <button
             @click="submitFeedback"
             class="mt-3 px-4 py-2 bg-[#00C786] hover:bg-[#00b277] rounded text-white font-medium"
         >
-          Pošalji
+          {{ $t('feedback_button') }}
         </button>
-        <p v-if="feedbackSent" class="text-green-400 mt-2">Hvala na komentaru!</p>
+
+        <p v-if="feedbackSent" class="text-green-400 mt-2">
+          {{ $t('feedback_thanks') }}
+        </p>
       </div>
+
 
     </div>
 

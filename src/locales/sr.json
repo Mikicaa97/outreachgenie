@@ -181,6 +181,11 @@
   "dash_refine_replace": "Sačuvaj izmene (zameni)",
   "dash_refine_new": "Sačuvaj kao novu",
 
+  "feedback_title": "Pomozi nam da poboljšamo naš alat",
+  "feedback_placeholder": "Ostavi svoj komentar ili predlog...",
+  "feedback_button": "Pošalji",
+  "feedback_thanks": "Hvala na komentaru!",
+
   "header_plan": "Plan",
   "header_admin": "Admin Panel",
   "header_generator": "Generator",
