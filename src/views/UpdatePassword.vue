@@ -1,9 +1,9 @@
 <template>
-  <div class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat text-white px-4"
+  <div class="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-no-repeat text-white px-4"
        :style="{ backgroundImage: `url(${bgImage})` }"
   >
     <!-- overlay -->
-    <div class="absolute inset-0 z-0 bg-black/70"></div>
+    <div class="absolute inset-0 z-0 bg-black/50"></div>
     <div class="w-full max-w-md bg-gray-900 z-10 border border-gray-700 p-6 rounded">
       <select
           v-model="selectedLang"
