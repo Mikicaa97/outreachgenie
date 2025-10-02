@@ -19,7 +19,6 @@
           <a href="#pricing" class="hover:text-white transition">{{ $t('nav_pricing') }}</a>
           <a href="#faq" class="hover:text-white transition">{{ $t('nav_faq') }}</a>
           <RouterLink to="/contact" class="hover:text-white transition">{{ $t('nav_contact') }}</RouterLink>
-
         </nav>
 
         <div class="flex items-center gap-4">
@@ -56,28 +55,30 @@
     </div>
 
     <!-- Mobile Dropdown -->
-    <div v-if="isOpen" class="md:hidden bg-black text-white px-4 py-4 space-y-4 border-t border-gray-800">
-      <a href="#features" class="block hover:text-yellow-400">{{ $t('nav_features') }}</a>
-      <a href="#demo" class="block hover:text-yellow-400">{{ $t('nav_demo') }}</a>
-      <a href="#livedemo" class="block hover:text-yellow-400">{{ $t('nav_livedemo') }}</a>
-      <a href="#pricing" class="block hover:text-yellow-400">{{ $t('nav_pricing') }}</a>
-      <a href="#faq" class="block hover:text-yellow-400">{{ $t('nav_faq') }}</a>
-      <a href="/contact" class="block hover:text-yellow-400">{{ $t('nav_contact') }}</a>
+    <transition name="slide-fade">
+      <div v-if="isOpen" class="md:hidden bg-black text-white px-4 py-4 space-y-4 border-t border-gray-800">
+        <a href="#features" class="block hover:text-yellow-400">{{ $t('nav_features') }}</a>
+        <a href="#demo" class="block hover:text-yellow-400">{{ $t('nav_demo') }}</a>
+        <a href="#livedemo" class="block hover:text-yellow-400">{{ $t('nav_livedemo') }}</a>
+        <a href="#pricing" class="block hover:text-yellow-400">{{ $t('nav_pricing') }}</a>
+        <a href="#faq" class="block hover:text-yellow-400">{{ $t('nav_faq') }}</a>
+        <a href="/contact" class="block hover:text-yellow-400">{{ $t('nav_contact') }}</a>
 
-      <router-link to="/signup" class="block">
-        <button class="w-full mt-2 bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition">
-          {{ $t('nav_try_free') }}
+        <router-link to="/signup" class="block">
+          <button class="w-full mt-2 bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition">
+            {{ $t('nav_try_free') }}
+          </button>
+        </router-link>
+
+        <!-- Language switch -->
+        <button
+            @click="switchLang"
+            class="w-full mt-4 text-sm border border-zinc-700 px-3 py-2 rounded hover:border-yellow-400"
+        >
+          {{ locale.toUpperCase() }}
         </button>
-      </router-link>
-
-      <!-- Language switch -->
-      <button
-          @click="switchLang"
-          class="w-full mt-4 text-sm border border-zinc-700 px-3 py-2 rounded hover:border-yellow-400"
-      >
-        {{ locale.toUpperCase() }}
-      </button>
-    </div>
+      </div>
+    </transition>
   </header>
 </template>
 
@@ -92,3 +93,28 @@ const switchLang = () => {
   locale.value = locale.value === 'sr' ? 'en' : 'sr'
 }
 </script>
+
+<style scoped>
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
+}
+.slide-fade-leave-active {
+  transition: all 0.2s ease;
+}
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
+.slide-fade-enter-to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.slide-fade-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
+</style>

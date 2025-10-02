@@ -4,7 +4,7 @@
       :style="{ backgroundImage: `url(${bgImage})` }"
   >
     <!-- overlay -->
-    <div class="absolute inset-0 bg-black/70"></div>
+    <div class="absolute inset-0 bg-black/50"></div>
 
     <!-- 🌐 JEZICI -->
     <div class="absolute top-4 right-4 flex gap-2 z-10">
