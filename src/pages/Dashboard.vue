@@ -124,19 +124,31 @@
               <span>{{ t('dash_add_paragraphs') }}</span>
             </label>
 
+            <!-- Dugme za generisanje -->
             <button
-                type="submit"
+                type="button"
+                @click="generateEmail"
                 class="w-full px-4 py-2 rounded text-white font-medium transition
-                     bg-[#00C786] hover:bg-[#00b277] active:scale-95
-                     disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+         bg-[#00C786] hover:bg-[#00b277] active:scale-95
+         disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 :disabled="isLoading"
             >
-              <span v-if="isLoading" class="flex items-center gap-2">
-                <span class="w-4 h-4 rounded-full bg-white animate-pulse"></span>
-                {{ t('dash_generating') }}
-              </span>
-              <span v-else>{{ t('dash_send') }}</span>
+              <span v-if="isLoading">⏳ Generating...</span>
+              <span v-else>✍️ Generiši</span>
             </button>
+
+            <!-- Dugme za slanje -->
+            <button
+                type="button"
+                @click="sendEmail"
+                class="w-full mt-2 px-4 py-2 rounded text-white font-medium transition
+         bg-blue-600 hover:bg-blue-500 active:scale-95
+         disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                :disabled="!gmailConnected || !generatedMessage"
+            >
+              📩 Pošalji
+            </button>
+
 
             <div v-if="isLoading" class="text-center text-green-400 my-2 animate-pulse">
               {{ t('dash_generating_msg') }}
@@ -151,6 +163,14 @@
             <div class="mt-2 flex gap-3">
               <button @click="copyToClipboard(generatedMessage)" class="text-blue-400 hover:underline">
                 {{ t('dash_copy') }}
+              </button>
+              <!-- 📩 Novo dugme za slanje direktno iz preview-a -->
+              <button
+                  @click="sendEmail"
+                  class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white"
+                  :disabled="!gmailConnected || !generatedMessage"
+              >
+                📩 Pošalji
               </button>
             </div>
           </div>
@@ -547,13 +567,12 @@ const saveRefinedReplace = async () => {
   }
 }
 
-/** Submit */
-const submitForm = async () => {
-  if (!recipientEmail.value || !subject.value || !full_name.value || !company.value || !service.value || !offer_text.value) {
-    alert('Popuni sva polja, uključujući Recipient i Subject!')
+/** Generisanje */
+async function generateEmail() {
+  if (!recipientEmail.value || !subject.value) {
+    alert("Unesi Recipient i Subject!")
     return
   }
-
   try {
     isLoading.value = true
     generatedMessage.value = ''
@@ -569,69 +588,62 @@ const submitForm = async () => {
       formatted: addParagraphs.value
     })
 
-    const aiMessage = ai?.subject && ai?.body
+    generatedMessage.value = ai?.subject && ai?.body
         ? `${ai.subject}\n\n${ai.body}`
-        : (typeof ai === 'string' ? ai : 'Greška pri generisanju poruke.')
+        : (typeof ai === 'string' ? ai : 'Greška pri generisanju.')
 
-    generatedMessage.value = aiMessage
-
-    const user = session.value?.user
-    if (!user) return alert("Morate biti prijavljeni da biste slali poruke.")
-
-    // Sačuvaj u istoriji
-    const { error } = await supabase.from('outreach_messages').insert([{
+    await supabase.from('outreach_messages').insert([{
       full_name: full_name.value,
       company: company.value,
       service: service.value,
-      offer_text: aiMessage,
+      offer_text: generatedMessage.value,
       type: emailType.value,
       tone: tone.value,
-      user_id: user.id,
+      user_id: session.value.user.id,
       created_at: new Date().toISOString()
     }])
+    await loadMessages()
 
-    if (error) {
-      console.error("❌ Greška pri insertu (submitForm):", error.message)
-      alert("Greška pri upisu: " + error.message)
-    } else {
-      // ✅ Pošalji kroz Gmail (per-user)
-      try {
-        const res = await fetch("https://outreachgenie-production.up.railway.app/api/gmail/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: user.id,
-            to: recipientEmail.value,
-            subject: subject.value,
-            body: aiMessage
-          })
-        })
-        const data = await res.json()
-        if (data?.success) {
-          alert("✅ Email uspešno poslat kroz Gmail!")
-          gmailConnected.value = true
-        } else {
-          console.error("❌ Greška Gmail API:", data)
-          alert("Neuspešno slanje Gmail-a (pogledaj konzolu)")
-        }
-      } catch (sendErr) {
-        console.error("❌ Fetch greška:", sendErr)
-        alert("Greška pri pokušaju slanja Gmail-a.")
-      }
-
-      // reset forme
-      // (Recipient/Subject ostavljam da ostanu popunjeni radi bržeg slanja sledećeg)
-      full_name.value = ''
-      company.value = ''
-      service.value = ''
-      offer_text.value = ''
-      tone.value = 'friendly'
-      await loadMessages()
-    }
   } catch (err) {
-    console.error('❌ Greška u OpenAI:', err)
+    console.error("❌ Greška u AI:", err)
   } finally {
     isLoading.value = false
+  }
+}
+
+/** Slanje */
+async function sendEmail() {
+  if (!gmailConnected.value) {
+    alert("Poveži Gmail prvo!")
+    return
+  }
+  if (!generatedMessage.value) {
+    alert("Prvo generiši poruku.")
+    return
+  }
+
+  try {
+    const res = await fetch("https://outreachgenie-production.up.railway.app/api/gmail/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: session.value.user.id,
+        to: recipientEmail.value,
+        subject: subject.value,
+        body: generatedMessage.value
+      })
+    })
+
+    const data = await res.json()
+    if (data?.success) {
+      alert("✅ Email uspešno poslat!")
+    } else {
+      console.error("❌ Greška Gmail API:", data)
+      alert("Greška pri slanju Gmail-a.")
+    }
+  } catch (e) {
+    console.error("❌ Fetch greška:", e)
+    alert("Neuspešan pokušaj slanja.")
   }
 }
 
@@ -656,3 +668,4 @@ onMounted(async () => {
   }
 })
 </script>
+

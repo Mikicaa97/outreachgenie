@@ -346,19 +346,21 @@ app.post("/api/gmail/send", async (req, res) => {
         const { client, gmailEmail } = await getAuthedClientForUser(userId);
         const gmail = google.gmail({ version: "v1", auth: client });
 
-        const fromLine = gmailEmail
-            ? `From: ${gmailEmail}`
-            : `From: OutreachGenie <no-reply@outreachgenie.app>`;
+        if (!gmailEmail) {
+            return res.status(400).json({ error: "Korisnik nema povezan Gmail nalog" });
+        }
 
+        // ✅ Gmail zahteva Content-Type i charset
         const message = [
-            fromLine,
+            `From: ${gmailEmail}`,
             `To: ${to}`,
             `Subject: ${subject}`,
-            "", // prazna linija razdvaja header-e od body-ja
+            `Content-Type: text/plain; charset="UTF-8"`,
+            "",
             body,
         ].join("\n");
 
-        const encodedMessage = Buffer.from(message)
+        const encodedMessage = Buffer.from(message, "utf-8")
             .toString("base64")
             .replace(/\+/g, "-")
             .replace(/\//g, "_")
@@ -371,10 +373,11 @@ app.post("/api/gmail/send", async (req, res) => {
 
         res.json({ success: true, result });
     } catch (err) {
-        console.error("❌ Greška pri slanju Gmail-a:", err);
-        res.status(500).json({ error: err.message || "Gmail send error" });
+        console.error("❌ Greška pri slanju Gmail-a:", err?.response?.data || err.message || err);
+        res.status(500).json({ error: err?.response?.data || err.message || "Gmail send error" });
     }
 });
+
 
 // ---------- Health & Version ----------
 app.get("/api/health", (req, res) => res.json({ ok: true }));
