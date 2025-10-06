@@ -37,7 +37,7 @@
         <!-- DESNO: Generator -->
         <div>
           <!-- 🔹 Gmail Integracija -->
-          <div class="mb-6 flex flex-wrap items-center gap-3">
+          <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <button
                 @click="connectGmail"
                 class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition"
@@ -45,7 +45,8 @@
               📧 Poveži Gmail nalog
             </button>
             <span v-if="gmailConnected" class="text-green-400 font-semibold">
-              ✅ Gmail povezan <span v-if="gmailEmail">({{ gmailEmail }})</span>
+              ✅ Gmail povezan
+<!--              <span v-if="gmailEmail">({{ gmailEmail }})</span>-->
             </span>
             <span v-else class="text-yellow-400">Nalog nije povezan</span>
           </div>
@@ -129,8 +130,8 @@
                 type="button"
                 @click="generateEmail"
                 class="w-full px-4 py-2 rounded text-white font-medium transition
-         bg-[#00C786] hover:bg-[#00b277] active:scale-95
-         disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                bg-[#00C786] hover:bg-[#00b277] active:scale-95
+                disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 :disabled="isLoading"
             >
               <span v-if="isLoading">⏳ Generating...</span>
@@ -142,29 +143,38 @@
                 type="button"
                 @click="sendEmail"
                 class="w-full mt-2 px-4 py-2 rounded text-white font-medium transition
-         bg-blue-600 hover:bg-blue-500 active:scale-95
-         disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                bg-blue-600 hover:bg-blue-500 active:scale-95
+                disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 :disabled="!gmailConnected || !generatedMessage"
             >
               📩 Pošalji
             </button>
 
-
-            <div v-if="isLoading" class="text-center text-green-400 my-2 animate-pulse">
+            <div
+                v-if="isLoading"
+                class="text-center text-green-400 my-2 animate-pulse"
+            >
               {{ t('dash_generating_msg') }}
             </div>
           </form>
 
           <UpgradeCTA v-if="reachedLimit" />
 
-          <div v-if="generatedMessage" class="bg-gray-900 p-4 rounded border border-green-500">
-            <h3 class="text-green-400 mb-2 font-semibold">{{ t('dash_ai_title') }}</h3>
+          <div
+              v-if="generatedMessage"
+              class="bg-gray-900 p-4 rounded border border-green-500"
+          >
+            <h3 class="text-green-400 mb-2 font-semibold">
+              {{ t('dash_ai_title') }}
+            </h3>
             <pre class="whitespace-pre-wrap text-sm">{{ generatedMessage }}</pre>
             <div class="mt-2 flex gap-3">
-              <button @click="copyToClipboard(generatedMessage)" class="text-blue-400 hover:underline">
+              <button
+                  @click="copyToClipboard(generatedMessage)"
+                  class="text-blue-400 hover:underline"
+              >
                 {{ t('dash_copy') }}
               </button>
-              <!-- 📩 Novo dugme za slanje direktno iz preview-a -->
               <button
                   @click="sendEmail"
                   class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white"
@@ -178,9 +188,16 @@
       </div>
 
       <!-- REFINE MODAL -->
-      <div v-if="showRefine" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-gray-900 border border-gray-700 p-4 rounded w-full max-w-xl">
-          <h3 class="text-lg font-semibold mb-2 text-white">{{ t('dash_refine_title') }}</h3>
+      <div
+          v-if="showRefine"
+          class="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+      >
+        <div
+            class="bg-gray-900 border border-gray-700 p-4 rounded w-full max-w-xl"
+        >
+          <h3 class="text-lg font-semibold mb-2 text-white">
+            {{ t('dash_refine_title') }}
+          </h3>
 
           <textarea
               v-model="refineBaseText"
@@ -189,13 +206,19 @@
           ></textarea>
 
           <div class="grid grid-cols-2 gap-3 mb-3">
-            <select v-model="refineTone" class="p-2 border border-gray-600 rounded bg-black text-white">
+            <select
+                v-model="refineTone"
+                class="p-2 border border-gray-600 rounded bg-black text-white"
+            >
               <option value="short">{{ t('dash_tone_short') }}</option>
               <option value="formal">{{ t('dash_tone_formal') }}</option>
               <option value="friendly">{{ t('dash_tone_friendly') }}</option>
             </select>
 
-            <select v-model="refineType" class="p-2 border border-gray-600 rounded bg-black text-white">
+            <select
+                v-model="refineType"
+                class="p-2 border border-gray-600 rounded bg-black text-white"
+            >
               <option value="general">{{ t('dash_type_general') }}</option>
               <option value="offer">{{ t('dash_type_offer') }}</option>
               <option value="promo">{{ t('dash_type_promo') }}</option>
@@ -211,13 +234,23 @@
           </div>
 
           <div class="flex justify-end gap-2">
-            <button @click="showRefine=false" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600">
+            <button
+                @click="showRefine = false"
+                class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600"
+            >
               {{ t('dash_cancel') }}
             </button>
-            <button @click="saveRefinedReplace" class="px-3 py-1 rounded text-white" style="background:#00C786">
+            <button
+                @click="saveRefinedReplace"
+                class="px-3 py-1 rounded text-white"
+                style="background: #00c786"
+            >
               {{ t('dash_refine_replace') }}
             </button>
-            <button @click="saveRefinedAsNew" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-500">
+            <button
+                @click="saveRefinedAsNew"
+                class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-500"
+            >
               {{ t('dash_refine_new') }}
             </button>
           </div>
@@ -229,11 +262,16 @@
       <!-- 🔹 Sidebar za mobilnu istoriju -->
       <transition name="slide">
         <div v-if="showHistoryPanel" class="fixed inset-0 z-50 flex">
-          <div class="flex-1 bg-black/50" @click="showHistoryPanel = false"></div>
+          <div
+              class="flex-1 bg-black/50"
+              @click="showHistoryPanel = false"
+          ></div>
           <div class="w-80 bg-gray-900 h-full p-4 overflow-y-auto shadow-lg">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-bold">{{ t('dash_history') }}</h2>
-              <button @click="showHistoryPanel = false" class="text-red-400">✕</button>
+              <button @click="showHistoryPanel = false" class="text-red-400">
+                ✕
+              </button>
             </div>
 
             <HistoryPanel
@@ -250,7 +288,9 @@
       </transition>
 
       <!-- Feedback -->
-      <div class="max-w-6xl mx-auto mt-10 bg-gray border border-gray-700 p-4 rounded">
+      <div
+          class="max-w-6xl mx-auto mt-10 bg-gray border border-gray-700 p-4 rounded"
+      >
         <h2 class="text-lg font-semibold mb-3">{{ $t('feedback_title') }}</h2>
 
         <textarea
@@ -259,7 +299,10 @@
             class="w-full p-2 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-400"
         ></textarea>
 
-        <button @click="submitFeedback" class="mt-3 px-4 py-2 bg-[#00C786] hover:bg-[#00b277] rounded text-white font-medium">
+        <button
+            @click="submitFeedback"
+            class="mt-3 px-4 py-2 bg-[#00C786] hover:bg-[#00b277] rounded text-white font-medium"
+        >
           {{ $t('feedback_button') }}
         </button>
 
@@ -269,11 +312,29 @@
       </div>
     </div>
 
-    <div v-else>
-      <Profile :session="session" />
-    </div>
+    <!-- 🔔 Toast Notification -->
+    <transition name="fade">
+      <div
+          v-if="toastMessage"
+          :class="[
+          'fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg text-sm font-medium transition-all',
+          toastType === 'success'
+            ? 'bg-green-600 text-white'
+            : 'bg-red-600 text-white'
+        ]"
+      >
+        {{ toastMessage }}
+      </div>
+    </transition>
+
+<!--    &lt;!&ndash; Profile prikaz (ako nema session-a) &ndash;&gt;-->
+<!--    <div v-if="!toastMessage">-->
+<!--      <Profile :session="session" />-->
+<!--    </div>-->
   </div>
 </template>
+
+
 
 <script setup>
 import HistoryPanel from '@/components/HistoryPanel.vue'
@@ -310,6 +371,16 @@ const tone = ref('friendly')
 const emailType = ref('general')
 const addParagraphs = ref(false)
 
+// 🔔 Toast notifikacije
+const toastMessage = ref('')
+const toastType = ref('success')
+
+function showToast(message, type = 'success') {
+  toastMessage.value = message
+  toastType.value = type
+  setTimeout(() => (toastMessage.value = ''), 3000)
+}
+
 /** Poruke */
 const messages = ref([])
 
@@ -319,7 +390,7 @@ const gmailEmail = ref(null)
 
 async function connectGmail() {
   if (!session.value?.user?.id) {
-    alert('Uloguj se da povežeš Gmail.')
+    showToast(t('toast_login_gmail'), 'error')
     return
   }
   try {
@@ -332,11 +403,11 @@ async function connectGmail() {
     if (data?.url) {
       window.location.href = data.url
     } else {
-      alert('Ne mogu da generišem Google auth URL.')
+      showToast(t('toast_auth_url_error'), 'error')
     }
   } catch (e) {
     console.error('❌ auth-url error:', e)
-    alert('Greška pri otvaranju Google autorizacije.')
+    showToast(t('toast_auth_error'), 'error')
   }
 }
 
@@ -370,12 +441,12 @@ const feedbackSent = ref(false)
 
 const submitFeedback = async () => {
   if (!session.value?.user) {
-    alert("Moraš biti prijavljen da bi ostavio komentar.")
+    showToast(t('toast_login_feedback'), 'error')
     return
   }
 
   if (!feedbackMessage.value.trim()) {
-    alert("Unesi komentar pre slanja.")
+    showToast(t('toast_feedback_empty'), 'error')
     return
   }
 
@@ -394,10 +465,11 @@ const submitFeedback = async () => {
 
   if (error) {
     console.error("Greška pri upisu feedback-a:", error)
-    alert("Došlo je do greške. Pokušaj ponovo.")
+    showToast(t('toast_feedback_error'), 'error')
   } else {
     feedbackMessage.value = ''
     feedbackSent.value = true
+    showToast(t('toast_feedback_success'), 'success')
     setTimeout(() => (feedbackSent.value = false), 3000)
   }
 }
@@ -425,8 +497,9 @@ const filteredMessages = computed(() => {
 const copyToClipboard = async (text) => {
   try {
     await navigator.clipboard.writeText(text)
+    showToast(t('toast_copy_success'), 'success')
   } catch {
-    alert("Nešto nije u redu sa kopiranjem.")
+    showToast(t('toast_copy_error'), 'error')
   }
 }
 
@@ -479,8 +552,10 @@ const deleteMessage = async (id) => {
   const { error } = await supabase.from('outreach_messages').delete().eq('id', id)
   if (error) {
     console.error("❌ Greška pri brisanju:", error.message)
+    showToast(t('toast_delete_error'), 'error')
   } else {
     messages.value = messages.value.filter(m => m.id !== id)
+    showToast(t('toast_delete_success'), 'success')
   }
 }
 
@@ -494,7 +569,7 @@ const startRefine = (msg) => {
 }
 
 const saveRefinedAsNew = async () => {
-  if (!session.value?.user) return alert('Uloguj se.')
+  if (!session.value?.user) return showToast(t('toast_login_required'), 'error')
 
   const ai = await generateMessage({
     full_name: full_name.value || '—',
@@ -522,8 +597,9 @@ const saveRefinedAsNew = async () => {
 
   if (error) {
     console.error("❌ Greška pri insertu (saveRefinedAsNew):", error.message)
-    alert("Greška pri upisu: " + error.message)
+    showToast(t('toast_save_error'), 'error')
   } else {
+    showToast(t('toast_save_success'), 'success')
     showRefine.value = false
     refiningMessageId.value = null
     await loadMessages()
@@ -531,8 +607,8 @@ const saveRefinedAsNew = async () => {
 }
 
 const saveRefinedReplace = async () => {
-  if (!session.value?.user) return alert('Uloguj se.')
-  if (!refiningMessageId.value) return alert('Nema poruke za izmenu.')
+  if (!session.value?.user) return showToast(t('toast_login_required'), 'error')
+  if (!refiningMessageId.value) return showToast(t('toast_no_message'), 'error')
 
   const ai = await generateMessage({
     full_name: full_name.value || '—',
@@ -555,13 +631,14 @@ const saveRefinedReplace = async () => {
 
   if (error) {
     console.error("❌ Greška pri update:", error.message)
-    alert("Greška pri izmeni: " + error.message)
+    showToast(t('toast_update_error'), 'error')
   } else {
     messages.value = messages.value.map(m =>
         m.id === refiningMessageId.value
             ? { ...m, offer_text: aiMessage, type: refineType.value, tone: refineTone.value }
             : m
     )
+    showToast(t('toast_update_success'), 'success')
     showRefine.value = false
     refiningMessageId.value = null
   }
@@ -570,7 +647,7 @@ const saveRefinedReplace = async () => {
 /** Generisanje */
 async function generateEmail() {
   if (!recipientEmail.value || !subject.value) {
-    alert("Unesi Recipient i Subject!")
+    showToast(t('toast_fill_fields'), 'error')
     return
   }
   try {
@@ -590,7 +667,7 @@ async function generateEmail() {
 
     generatedMessage.value = ai?.subject && ai?.body
         ? `${ai.subject}\n\n${ai.body}`
-        : (typeof ai === 'string' ? ai : 'Greška pri generisanju.')
+        : (typeof ai === 'string' ? ai : t('toast_generate_error'))
 
     await supabase.from('outreach_messages').insert([{
       full_name: full_name.value,
@@ -603,9 +680,10 @@ async function generateEmail() {
       created_at: new Date().toISOString()
     }])
     await loadMessages()
-
+    showToast(t('toast_generate_success'), 'success')
   } catch (err) {
     console.error("❌ Greška u AI:", err)
+    showToast(t('toast_generate_error'), 'error')
   } finally {
     isLoading.value = false
   }
@@ -614,11 +692,11 @@ async function generateEmail() {
 /** Slanje */
 async function sendEmail() {
   if (!gmailConnected.value) {
-    alert("Poveži Gmail prvo!")
+    showToast(t('toast_connect_gmail'), 'error')
     return
   }
   if (!generatedMessage.value) {
-    alert("Prvo generiši poruku.")
+    showToast(t('toast_generate_first'), 'error')
     return
   }
 
@@ -636,14 +714,14 @@ async function sendEmail() {
 
     const data = await res.json()
     if (data?.success) {
-      alert("✅ Email uspešno poslat!")
+      showToast(t('toast_email_sent'), 'success')
     } else {
       console.error("❌ Greška Gmail API:", data)
-      alert("Greška pri slanju Gmail-a.")
+      showToast(t('toast_email_error'), 'error')
     }
   } catch (e) {
     console.error("❌ Fetch greška:", e)
-    alert("Neuspešan pokušaj slanja.")
+    showToast(t('toast_email_failed'), 'error')
   }
 }
 
@@ -668,4 +746,5 @@ onMounted(async () => {
   }
 })
 </script>
+
 

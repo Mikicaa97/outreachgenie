@@ -1,5 +1,4 @@
 {
-
   "nav_features": "Funkcionalnosti",
   "nav_demo": "Demo",
   "nav_livedemo": "Live demo",
@@ -7,8 +6,6 @@
   "nav_faq": "Česta pitanja",
   "nav_contact": "Kontakt",
   "nav_try_free": "Isprobaj besplatno",
-
-
 
   "hero_headline": "Tvoje tajno oružje za efikasne cold emailove",
   "hero_subtitle": "OutreachGenie koristi veštačku inteligenciju da ti pomogne da napišeš personalizovane, ubedljive i kratke poruke koje konvertuju.",
@@ -278,6 +275,32 @@
   "auth_passwords_mismatch": "Lozinke se ne poklapaju.",
   "auth_password_updated": "Lozinka je uspešno promenjena. Preusmeravanje na prijavu...",
   "auth_set_password_btn": "Sačuvaj lozinku",
+
+  "toast_login_gmail": "Uloguj se da povežeš Gmail.",
+  "toast_auth_url_error": "Ne mogu da generišem Google auth URL.",
+  "toast_auth_error": "Greška pri otvaranju Google autorizacije.",
+  "toast_login_feedback": "Moraš biti prijavljen da bi ostavio komentar.",
+  "toast_feedback_empty": "Unesi komentar pre slanja.",
+  "toast_feedback_error": "Došlo je do greške. Pokušaj ponovo.",
+  "toast_feedback_success": "Hvala na komentaru!",
+  "toast_copy_success": "Tekst je uspešno kopiran!",
+  "toast_copy_error": "Nešto nije u redu sa kopiranjem.",
+  "toast_delete_error": "Greška pri brisanju poruke.",
+  "toast_delete_success": "Poruka je uspešno obrisana.",
+  "toast_login_required": "Moraš biti prijavljen.",
+  "toast_no_message": "Nema poruke za izmenu.",
+  "toast_save_error": "Greška pri upisu poruke.",
+  "toast_save_success": "Poruka je uspešno sačuvana.",
+  "toast_update_error": "Greška pri izmeni poruke.",
+  "toast_update_success": "Poruka je uspešno izmenjena.",
+  "toast_fill_fields": "Unesi Recipient i Subject polja.",
+  "toast_generate_error": "Greška pri generisanju poruke.",
+  "toast_generate_success": "Poruka je uspešno generisana.",
+  "toast_connect_gmail": "Poveži Gmail prvo!",
+  "toast_generate_first": "Prvo generiši poruku.",
+  "toast_email_sent": "✅ Email uspešno poslat!",
+  "toast_email_error": "Greška pri slanju Gmail-a.",
+  "toast_email_failed": "Neuspešan pokušaj slanja emaila.",
 
   "saving": "Čuvanje...",
   "close": "Zatvori",
