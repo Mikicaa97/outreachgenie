@@ -104,6 +104,7 @@
   "ph_service_general": "E.g. restaurant owners, marketing teams...",
 
   "generate_button": "Generate message",
+  "send_button": "Send Email",
   "loading": "Generating...",
   "loading_message": "Generating your message...",
   "limit_reached": "You have already used the demo. Sign up for unlimited access. 🚀",

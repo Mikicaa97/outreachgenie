@@ -104,6 +104,7 @@
   "ph_service_general": "Npr. vlasnicima restorana, marketing timovima...",
 
   "generate_button": "Generiši poruku",
+  "send_button": "Pošalji Email",
   "loading": "Generišem...",
   "loading_message": "Generišem poruku...",
   "limit_reached": "Već ste iskoristili demo. Prijavite se za neograničen pristup. 🚀",

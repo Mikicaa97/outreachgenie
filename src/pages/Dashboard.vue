@@ -135,7 +135,7 @@
                 :disabled="isLoading"
             >
               <span v-if="isLoading">⏳ Generating...</span>
-              <span v-else>✍️ Generiši</span>
+              <span v-else>✍️{{t('generate_button')}}</span>
             </button>
 
             <!-- Dugme za slanje -->
@@ -147,7 +147,7 @@
                 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 :disabled="!gmailConnected || !generatedMessage"
             >
-              📩 Pošalji
+              📩 {{t('send_button')}}
             </button>
 
             <div
