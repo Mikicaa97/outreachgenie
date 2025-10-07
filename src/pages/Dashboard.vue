@@ -42,13 +42,13 @@
                 @click="connectGmail"
                 class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition"
             >
-              📧 Poveži Gmail nalog
+              📧 {{ t('dash_gmail_button') }}
             </button>
             <span v-if="gmailConnected" class="text-green-400 font-semibold">
-              ✅ Gmail povezan
+              ✅ {{t('dash_connected_gmail')}}
 <!--              <span v-if="gmailEmail">({{ gmailEmail }})</span>-->
             </span>
-            <span v-else class="text-yellow-400">Nalog nije povezan</span>
+            <span v-else class="text-yellow-400">{{t('dash_gmail_field')}}</span>
           </div>
 
           <form @submit.prevent="submitForm" class="space-y-4 mb-8">

@@ -169,6 +169,10 @@
   "dash_tone_friendly": "Prijateljski i topao",
   "dash_add_paragraphs": "Dodaj paragrafe za čitljivost",
 
+  "dash_connected_gmail" : "Gmail povezan!",
+  "dash_gmail_button": "Poveži Gmail nalog",
+  "dash_gmail_field": "Nalog nije povezan",
+
   "dash_send": "Pošalji",
   "dash_generating": "Generišem...",
   "dash_generating_msg": "✨ Generišem poruku...",

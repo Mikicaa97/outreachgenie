@@ -169,6 +169,10 @@
   "dash_tone_friendly": "Friendly and warm",
   "dash_add_paragraphs": "Add paragraphs for readability",
 
+  "dash_connected_gmail" : "Gmail is connected!",
+  "dash_gmail_button": "Connect Gmail account",
+  "dash_gmail_field": "The account is not connected",
+
   "dash_send": "Send",
   "dash_generating": "Generating...",
   "dash_generating_msg": "✨ Generating message...",
