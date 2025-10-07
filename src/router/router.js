@@ -48,7 +48,13 @@ const routes = [
                 name: 'Profile',
                 component: Profile,
                 meta: { requiresAuth: true }
-            }
+            },
+            {
+                path: '/my-emails',
+                name: 'MyEmails',
+                component: () => import('@/pages/MyEmails.vue'),
+                meta: { requiresAuth: true }
+            },
         ]
     },
     { path: '/success', name: 'Success', component: Success },

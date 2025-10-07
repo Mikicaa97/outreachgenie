@@ -8,6 +8,7 @@ import OpenAI from "openai";
 import path from "path";
 import { fileURLToPath } from "url";
 import { google } from "googleapis";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -350,15 +351,54 @@ app.post("/api/gmail/send", async (req, res) => {
             return res.status(400).json({ error: "Korisnik nema povezan Gmail nalog" });
         }
 
-        // ✅ Gmail zahteva Content-Type i charset
+        // // ✅ Gmail zahteva Content-Type i charset
+        // const message = [
+        //     `From: ${gmailEmail}`,
+        //     `To: ${to}`,
+        //     `Subject: ${subject}`,
+        //     `Content-Type: text/plain; charset="UTF-8"`,
+        //     "",
+        //     body,
+        // ].join("\n");
+
+        // generiši unique ID za praćenje
+        const trackingId = crypto.randomUUID();
+        const trackingPixelUrl = `https://outreachgenie-production.up.railway.app/track/open/${trackingId}.png`;
+
+        // zameni tekst poruke da bude HTML (ako nije već)
+                const htmlBody = `
+          <div>
+            ${body.replace(/\n/g, "<br>")}
+            <img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" />
+          </div>
+        `;
+
         const message = [
             `From: ${gmailEmail}`,
             `To: ${to}`,
             `Subject: ${subject}`,
-            `Content-Type: text/plain; charset="UTF-8"`,
+            `Content-Type: text/html; charset="UTF-8"`,
             "",
-            body,
+            htmlBody,
         ].join("\n");
+
+        // opcionalno sačuvaj trackingId u outreach_messages
+        const { data: lastMessage } = await supabase
+            .from("outreach_messages")
+            .select("id")
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
+
+        if (lastMessage) {
+            await supabase
+                .from("outreach_messages")
+                .update({ tracking_id: trackingId })
+                .eq("id", lastMessage.id);
+        }
+
+
 
         const encodedMessage = Buffer.from(message, "utf-8")
             .toString("base64")
@@ -379,6 +419,83 @@ app.post("/api/gmail/send", async (req, res) => {
 });
 
 
+// ---------- Email events: status po useru ----------
+app.get("/api/email-events/status", async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        if (!userId) return res.status(400).json({ error: "Nedostaje userId" });
+
+        const { data, error } = await supabase
+            .from("email_events")
+            .select("tracking_id, event_type")
+            .eq("user_id", userId);
+
+        if (error) throw error;
+
+        // Grupisemo po tracking_id (ako ima barem jedan "open", smatramo otvorenim)
+        const opened = {};
+        for (const row of data) {
+            if (row.event_type === "open") opened[row.tracking_id] = true;
+        }
+
+        res.json({ opened });
+    } catch (err) {
+        console.error("❌ /api/email-events/status error:", err.message);
+        res.status(500).json({ error: "Greška pri čitanju statusa" });
+    }
+});
+
+// ---------- Email Tracking ----------
+app.get("/track/open/:id.png", async (req, res) => {
+    try {
+        const openId = req.params.id;
+        const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+        const userAgent = req.headers["user-agent"] || "unknown";
+
+        // 🔍 pronađi user_id iz outreach_messages
+        const { data: msg, error: findError } = await supabase
+            .from("outreach_messages")
+            .select("user_id")
+            .eq("tracking_id", openId)
+            .single();
+
+        if (findError) console.warn("⚠️ Nije pronađen user_id za tracking:", findError.message);
+
+        // 🧾 upiši event u email_events
+        const { error } = await supabase
+            .from("email_events")
+            .insert([
+                {
+                    event_type: "open",
+                    tracking_id: openId,
+                    user_id: msg?.user_id || null,
+                    ip_address: ip,
+                    user_agent: userAgent,
+                    created_at: new Date().toISOString(),
+                },
+            ]);
+
+        if (error) console.error("❌ Greška pri logovanju open eventa:", error.message);
+
+        // ✅ pošalji transparentni 1x1 PNG
+        const pixel = Buffer.from(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=",
+            "base64"
+        );
+
+        res.writeHead(200, {
+            "Content-Type": "image/png",
+            "Content-Length": pixel.length,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+        });
+        res.end(pixel);
+    } catch (err) {
+        console.error("❌ Tracking error:", err);
+        res.status(500).send("Tracking error");
+    }
+});
+
+
 // ---------- Health & Version ----------
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 app.get("/api/version", (req, res) =>
@@ -392,6 +509,8 @@ console.log("Serving frontend from:", distPath);
 app.get("/healthz", (req, res) => {
     res.status(200).send("OK");
 });
+
+
 
 app.use(express.static(distPath));
 app.get("*", (req, res) => {

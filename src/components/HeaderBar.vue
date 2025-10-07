@@ -60,12 +60,44 @@
       </div>
 
       <!-- Desktop navigation -->
+<!--      <nav class="hidden md:flex items-center gap-2 ml-4">-->
+<!--        <button @click="navigateTo('home')" class="px-3 py-1 rounded hover:bg-gray-800 transition">{{ t('header_generator') }}</button>-->
+<!--        <button @click="navigateTo('profile')" class="px-3 py-1 rounded hover:bg-gray-800 transition">{{ t('header_profile') }}</button>-->
+<!--        <SubscribeButton />-->
+<!--        <button @click="logout" class="px-3 py-1 rounded hover:bg-gray-800 transition">{{ t('header_logout') }}</button>-->
+<!--      </nav>-->
+
       <nav class="hidden md:flex items-center gap-2 ml-4">
-        <button @click="navigateTo('home')" class="px-3 py-1 rounded hover:bg-gray-800 transition">{{ t('header_generator') }}</button>
-        <button @click="navigateTo('profile')" class="px-3 py-1 rounded hover:bg-gray-800 transition">{{ t('header_profile') }}</button>
+        <button
+            @click="navigateTo('home')"
+            class="px-3 py-1 rounded hover:bg-gray-800 transition"
+        >
+          {{ t('header_generator') }}
+        </button>
+
+        <button
+            @click="navigateTo('emails')"
+            class="px-3 py-1 rounded hover:bg-gray-800 transition"
+        >
+          {{ t('header_myemails') }}
+        </button>
+
+        <button
+            @click="navigateTo('profile')"
+            class="px-3 py-1 rounded hover:bg-gray-800 transition"
+        >
+          {{ t('header_profile') }}
+        </button>
+
         <SubscribeButton />
-        <button @click="logout" class="px-3 py-1 rounded hover:bg-gray-800 transition">{{ t('header_logout') }}</button>
+        <button
+            @click="logout"
+            class="px-3 py-1 rounded hover:bg-gray-800 transition"
+        >
+          {{ t('header_logout') }}
+        </button>
       </nav>
+
 
       <!-- Mobile menu button -->
       <div class="md:hidden ml-2">
@@ -94,6 +126,12 @@
 
           <!-- Nav links -->
           <button @click="navigateTo('home'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_generator') }}</button>
+          <button
+              @click="navigateTo('emails'); open = false"
+              class="w-full text-left px-3 py-2 rounded hover:bg-gray-800"
+          >
+            {{ t('header_myemails') }}
+          </button>
           <button @click="navigateTo('profile'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_profile') }}</button>
           <SubscribeButton />
           <button @click="logout" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_logout') }}</button>
@@ -138,6 +176,8 @@ const switchLang = () => {
 function navigateTo(view) {
   if (view === 'home') {
     router.push('/dashboard')
+  } else if (view === 'emails') {
+    router.push('/my-emails')
   } else if (view === 'profile') {
     router.push('/dashboard/profile')
   }

@@ -188,6 +188,7 @@
   "header_admin": "Admin Panel",
   "header_generator": "Generator",
   "header_profile": "Profile",
+  "header_myemails": "My Emails",
   "header_logout": "Log Out",
 
   "profile_greeting": "Good to see you",

@@ -375,6 +375,22 @@ const addParagraphs = ref(false)
 const toastMessage = ref('')
 const toastType = ref('success')
 
+const openedStatus = ref({}) // { tracking_id: true }
+
+async function loadOpenedStatus() {
+  if (!session.value?.user?.id) return;
+  try {
+    const res = await fetch(
+        `https://outreachgenie-production.up.railway.app/api/email-events/status?userId=${session.value.user.id}`
+    );
+    const data = await res.json();
+    openedStatus.value = data.opened || {};
+  } catch (e) {
+    console.error("⚠️ Greška pri učitavanju open statusa:", e);
+  }
+}
+
+
 function showToast(message, type = 'success') {
   toastMessage.value = message
   toastType.value = type
@@ -534,6 +550,7 @@ const loadMessages = async () => {
     messages.value = [...data]
   }
 }
+
 
 /** Edit */
 const editMessage = (msg) => {
@@ -723,6 +740,17 @@ async function sendEmail() {
     console.error("❌ Fetch greška:", e)
     showToast(t('toast_email_failed'), 'error')
   }
+
+  await supabase
+      .from("outreach_messages")
+      .update({
+        recipient: recipientEmail.value,
+        subject: subject.value,
+      })
+      .eq("user_id", session.value.user.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
 }
 
 /** Mount & Auth */
@@ -744,6 +772,9 @@ onMounted(async () => {
     loadUserPlan()
     checkGmailStatus()
   }
+
+  await loadMessages();
+  await loadOpenedStatus();
 })
 </script>
 
