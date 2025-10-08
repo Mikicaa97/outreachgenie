@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold mb-6 text-center">📊 My Sent Emails</h1>
 
     <!-- Statistika -->
-    <div class="flex flex-wrap justify-center gap-6 mb-8">
+    <div class="flex flex-wrap justify-center max-w-6xl mx-auto gap-6 mb-8">
       <div class="bg-gray-900 border border-gray-700 rounded-lg p-4 w-48 text-center">
         <p class="text-sm text-gray-400">Open rate</p>
         <p class="text-2xl font-semibold text-green-400">{{ openRate }}%</p>
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Tabela mejlova -->
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto max-w-6xl mx-auto">
       <table class="min-w-full bg-gray-900 border border-gray-700 rounded-lg">
         <thead class="bg-gray-800 text-gray-300 uppercase text-xs">
         <tr>
@@ -34,7 +34,7 @@
         <tr
             v-for="msg in emails"
             :key="msg.id"
-            class="border-t border-gray-700 hover:bg-gray-800 transition"
+            class="w-full border-t border-gray-700 hover:bg-gray-800 transition"
         >
           <td class="py-3 px-4">{{ msg.recipient || "—" }}</td>
           <td class="py-3 px-4">{{ msg.subject || "No subject" }}</td>
@@ -113,6 +113,11 @@ const openedStatus = ref({});
 const selectedMessage = ref(null);
 const session = ref(null);
 
+const API_BASE = window.location.hostname.includes("localhost")
+    ? "http://localhost:3000"
+    : "https://outreachgenie-production.up.railway.app";
+
+
 // 🧠 Učitaj podatke
 async function loadEmails() {
   const { data: auth } = await supabase.auth.getSession();
@@ -134,9 +139,7 @@ async function loadEmails() {
 
   // 2. Učitaj open statuse
   if (!session.value?.user?.id) return;
-  const res = await fetch(
-      `https://outreachgenie-production.up.railway.app/api/email-events/status?userId=${session.value.user.id}`
-  );
+  const res = await fetch(`${API_BASE}/api/email-events/status?userId=${session.value.user.id}`);
   const data = await res.json();
   openedStatus.value = data.opened || {};
 

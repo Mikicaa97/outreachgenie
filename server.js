@@ -452,37 +452,73 @@ app.get("/track/open/:id.png", async (req, res) => {
         const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
         const userAgent = req.headers["user-agent"] || "unknown";
 
-        // 🔍 pronađi user_id iz outreach_messages
-        const { data: msg, error: findError } = await supabase
+        // ⚠️ 1. Ignoriši ako User-Agent dolazi sa poznatih botova / proxy servera
+        const ignoredAgents = [
+            "GoogleImageProxy", // Gmail proxy
+            "Google-Apps-Script",
+            "Outlook",
+            "curl/",
+            "Python-urllib",
+            "node-fetch",
+            "Google-HTTP-Java-Client",
+        ];
+        if (ignoredAgents.some(agent => userAgent.includes(agent))) {
+            console.log("⚠️ Ignorišem open event (bot/proxy):", userAgent);
+            return res.status(204).end();
+        }
+
+        // ⚠️ 2. Ignoriši ako IP nije stvaran (npr. Google proxy IP)
+        if (ip?.startsWith("66.249") || ip?.startsWith("64.233")) {
+            console.log("⚠️ Ignorišem Google proxy IP:", ip);
+            return res.status(204).end();
+        }
+
+        // ⚠️ 3. Ignoriši duple opens (isti tracking_id u poslednjih 2 minuta)
+        const { data: existing } = await supabase
+            .from("email_events")
+            .select("created_at")
+            .eq("tracking_id", openId)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+        if (
+            existing?.length &&
+            Date.now() - new Date(existing[0].created_at).getTime() < 120000
+        ) {
+            console.log("⚠️ Ignorišem dupli open (recent):", openId);
+            return res.status(204).end();
+        }
+
+        // ✅ Nađi user_id na osnovu tracking_id iz outreach_messages
+        const { data: msg } = await supabase
             .from("outreach_messages")
             .select("user_id")
             .eq("tracking_id", openId)
             .single();
 
-        if (findError) console.warn("⚠️ Nije pronađen user_id za tracking:", findError.message);
+        const userId = msg?.user_id || null;
 
-        // 🧾 upiši event u email_events
-        const { error } = await supabase
-            .from("email_events")
-            .insert([
-                {
-                    event_type: "open",
-                    tracking_id: openId,
-                    user_id: msg?.user_id || null,
-                    ip_address: ip,
-                    user_agent: userAgent,
-                    created_at: new Date().toISOString(),
-                },
-            ]);
+        // ✅ Upis u email_events
+        const { error } = await supabase.from("email_events").insert([
+            {
+                event_type: "open",
+                tracking_id: openId,
+                ip_address: ip,
+                user_agent: userAgent,
+                user_id: userId,
+                is_real_open: true, // nova kolona
+                created_at: new Date().toISOString(),
+            },
+        ]);
 
-        if (error) console.error("❌ Greška pri logovanju open eventa:", error.message);
+        if (error)
+            console.error("❌ Greška pri logovanju open eventa:", error.message);
 
-        // ✅ pošalji transparentni 1x1 PNG
+        // ✅ Vrati transparentni 1x1 PNG
         const pixel = Buffer.from(
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=",
             "base64"
         );
-
         res.writeHead(200, {
             "Content-Type": "image/png",
             "Content-Length": pixel.length,
@@ -494,6 +530,9 @@ app.get("/track/open/:id.png", async (req, res) => {
         res.status(500).send("Tracking error");
     }
 });
+
+
+
 
 
 // ---------- Health & Version ----------

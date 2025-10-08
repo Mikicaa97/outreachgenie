@@ -371,6 +371,11 @@ const tone = ref('friendly')
 const emailType = ref('general')
 const addParagraphs = ref(false)
 
+const API_BASE = window.location.hostname.includes("localhost")
+    ? "http://localhost:3000"
+    : "https://outreachgenie-production.up.railway.app";
+
+
 // 🔔 Toast notifikacije
 const toastMessage = ref('')
 const toastType = ref('success')
@@ -380,9 +385,7 @@ const openedStatus = ref({}) // { tracking_id: true }
 async function loadOpenedStatus() {
   if (!session.value?.user?.id) return;
   try {
-    const res = await fetch(
-        `https://outreachgenie-production.up.railway.app/api/email-events/status?userId=${session.value.user.id}`
-    );
+    const res = await fetch(`${API_BASE}/api/email-events/status?userId=${session.value.user.id}`);
     const data = await res.json();
     openedStatus.value = data.opened || {};
   } catch (e) {
@@ -410,7 +413,7 @@ async function connectGmail() {
     return
   }
   try {
-    const resp = await fetch('https://outreachgenie-production.up.railway.app/api/gmail/auth-url', {
+    const resp = await fetch(`${API_BASE}/api/gmail/auth-url`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: session.value.user.id })
@@ -430,7 +433,7 @@ async function connectGmail() {
 async function checkGmailStatus() {
   if (!session.value?.user?.id) return
   try {
-    const resp = await fetch(`https://outreachgenie-production.up.railway.app/api/gmail/status?userId=${session.value.user.id}`)
+    const resp = await fetch(`${API_BASE}/api/gmail/status?userId=${session.value.user.id}`);
     const data = await resp.json()
     gmailConnected.value = !!data?.connected
     gmailEmail.value = data?.email || null
@@ -718,7 +721,7 @@ async function sendEmail() {
   }
 
   try {
-    const res = await fetch("https://outreachgenie-production.up.railway.app/api/gmail/send", {
+    const res = await fetch(`${API_BASE}/api/gmail/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
