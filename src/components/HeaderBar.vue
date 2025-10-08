@@ -184,10 +184,16 @@ function navigateTo(view) {
 }
 
 // Logout
-const logout = async () => {
-  await supabase.auth.signOut()
-  router.push('/login')
+async function logout() {
+  try {
+    await supabase.auth.signOut({ scope: 'global' })
+  } catch (err) {
+    console.warn('⚠️ Signout ignoriše grešku:', err.message)
+  }
+  localStorage.clear()
+  window.location.href = '/login'
 }
+
 
 // Odredi klasu za badge boju plana
 const planBadgeColor = (plan) => {

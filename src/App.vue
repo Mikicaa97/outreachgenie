@@ -37,6 +37,28 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import CookiesBanner from "@/components/CookiesBanner.vue";
+import { supabase } from './supabase.js'
+
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'TOKEN_REFRESHED') {
+    console.log('🔄 Token refreshed');
+  }
+
+  if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+    console.log('🚪 Korisnik odjavljen');
+    localStorage.clear();
+    window.location.href = '/login';
+  }
+
+  // Ako token nije validan, Supabase vraća null session
+  if (!session && event === 'TOKEN_REFRESH_FAILED') {
+    console.warn('⚠️ Token nevažeći - automatski logout');
+    await supabase.auth.signOut({ scope: 'global' });
+    localStorage.clear();
+    window.location.href = '/login';
+  }
+});
+
 
 const showButton = ref(false)
 const scrollProgress = ref(0)

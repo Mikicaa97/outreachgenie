@@ -435,10 +435,14 @@ app.get("/api/email-events/status", async (req, res) => {
         // Grupisemo po tracking_id (ako ima barem jedan "open", smatramo otvorenim)
         const opened = {};
         for (const row of data) {
-            if (row.event_type === "open") opened[row.tracking_id] = true;
+            if (row.event_type === "open") {
+                if (!opened[row.tracking_id]) opened[row.tracking_id] = {};
+                if (row.is_real_open) opened[row.tracking_id].real = true;
+                else opened[row.tracking_id].probable = true;
+            }
         }
-
         res.json({ opened });
+
     } catch (err) {
         console.error("❌ /api/email-events/status error:", err.message);
         res.status(500).json({ error: "Greška pri čitanju statusa" });
@@ -462,9 +466,11 @@ app.get("/track/open/:id.png", async (req, res) => {
             "node-fetch",
             "Google-HTTP-Java-Client",
         ];
-        if (ignoredAgents.some(agent => userAgent.includes(agent))) {
-            console.log("⚠️ Ignorišem open event (bot/proxy):", userAgent);
-            return res.status(204).end();
+        let isReal = true;
+
+        if (userAgent.includes("GoogleImageProxy")) {
+            console.log("⚠️ Gmail proxy open – beležim kao 'probable open'.");
+            isReal = false; // Gmail prefetch, nije realan open
         }
 
         // ⚠️ 2. Ignoriši ako IP nije stvaran (npr. Google proxy IP)
@@ -506,7 +512,7 @@ app.get("/track/open/:id.png", async (req, res) => {
                 ip_address: ip,
                 user_agent: userAgent,
                 user_id: userId,
-                is_real_open: true, // nova kolona
+                is_real_open: isReal,
                 created_at: new Date().toISOString(),
             },
         ]);
