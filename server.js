@@ -351,27 +351,27 @@ app.post("/api/gmail/send", async (req, res) => {
             return res.status(400).json({ error: "Korisnik nema povezan Gmail nalog" });
         }
 
-        // // ✅ Gmail zahteva Content-Type i charset
-        // const message = [
-        //     `From: ${gmailEmail}`,
-        //     `To: ${to}`,
-        //     `Subject: ${subject}`,
-        //     `Content-Type: text/plain; charset="UTF-8"`,
-        //     "",
-        //     body,
-        // ].join("\n");
-
         // generiši unique ID za praćenje
         const trackingId = crypto.randomUUID();
         const trackingPixelUrl = `https://outreachgenie-production.up.railway.app/track/open/${trackingId}.png`;
 
-        // zameni tekst poruke da bude HTML (ako nije već)
+        // zameni sve linkove u tekstu sa tracking verzijom
+        const trackedBody = body.replace(
+            /(https?:\/\/[^\s]+)/g,
+            (url) => {
+                const encoded = Buffer.from(url).toString("base64");
+                return `https://outreachgenie-production.up.railway.app/track/click/${trackingId}/${encoded}`;
+            }
+        );
+
+        // formiraj HTML telo mejla
                 const htmlBody = `
           <div>
-            ${body.replace(/\n/g, "<br>")}
+            ${trackedBody.replace(/\n/g, "<br>")}
             <img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" />
           </div>
         `;
+
 
         const message = [
             `From: ${gmailEmail}`,
@@ -427,75 +427,45 @@ app.get("/api/email-events/status", async (req, res) => {
 
         const { data, error } = await supabase
             .from("email_events")
-            .select("tracking_id, event_type")
+            .select("tracking_id, event_type, is_real_open")
             .eq("user_id", userId);
 
         if (error) throw error;
 
-        // Grupisemo po tracking_id (ako ima barem jedan "open", smatramo otvorenim)
-        const opened = {};
+        const status = {};
         for (const row of data) {
+            if (!status[row.tracking_id]) status[row.tracking_id] = {};
             if (row.event_type === "open") {
-                if (!opened[row.tracking_id]) opened[row.tracking_id] = {};
-                if (row.is_real_open) opened[row.tracking_id].real = true;
-                else opened[row.tracking_id].probable = true;
+                if (row.is_real_open) status[row.tracking_id].real = true;
+                else status[row.tracking_id].probable = true;
             }
+            if (row.event_type === "click") status[row.tracking_id].clicked = true;
         }
-        res.json({ opened });
 
+        res.json({ opened: status });
     } catch (err) {
         console.error("❌ /api/email-events/status error:", err.message);
         res.status(500).json({ error: "Greška pri čitanju statusa" });
     }
 });
 
-// ---------- Email Tracking ----------
+
+// ---------- Email Tracking (Open + Click) ----------
+// ✅ OPEN TRACKING
 app.get("/track/open/:id.png", async (req, res) => {
     try {
         const openId = req.params.id;
         const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
         const userAgent = req.headers["user-agent"] || "unknown";
-
-        // ⚠️ 1. Ignoriši ako User-Agent dolazi sa poznatih botova / proxy servera
-        const ignoredAgents = [
-            "GoogleImageProxy", // Gmail proxy
-            "Google-Apps-Script",
-            "Outlook",
-            "curl/",
-            "Python-urllib",
-            "node-fetch",
-            "Google-HTTP-Java-Client",
-        ];
         let isReal = true;
 
-        if (userAgent.includes("GoogleImageProxy")) {
-            console.log("⚠️ Gmail proxy open – beležim kao 'probable open'.");
-            isReal = false; // Gmail prefetch, nije realan open
+        // Gmail i Apple mail proxy detekcija
+        if (userAgent.includes("GoogleImageProxy") || ip?.startsWith("66.249") || ip?.startsWith("64.233")) {
+            console.log("⚠️ Gmail proxy open – beležim kao 'probable open'. IP:", ip);
+            isReal = false;
         }
 
-        // ⚠️ 2. Ignoriši ako IP nije stvaran (npr. Google proxy IP)
-        if (ip?.startsWith("66.249") || ip?.startsWith("64.233")) {
-            console.log("⚠️ Ignorišem Google proxy IP:", ip);
-            return res.status(204).end();
-        }
-
-        // ⚠️ 3. Ignoriši duple opens (isti tracking_id u poslednjih 2 minuta)
-        const { data: existing } = await supabase
-            .from("email_events")
-            .select("created_at")
-            .eq("tracking_id", openId)
-            .order("created_at", { ascending: false })
-            .limit(1);
-
-        if (
-            existing?.length &&
-            Date.now() - new Date(existing[0].created_at).getTime() < 120000
-        ) {
-            console.log("⚠️ Ignorišem dupli open (recent):", openId);
-            return res.status(204).end();
-        }
-
-        // ✅ Nađi user_id na osnovu tracking_id iz outreach_messages
+        // pronađi korisnika
         const { data: msg } = await supabase
             .from("outreach_messages")
             .select("user_id")
@@ -504,23 +474,33 @@ app.get("/track/open/:id.png", async (req, res) => {
 
         const userId = msg?.user_id || null;
 
-        // ✅ Upis u email_events
-        const { error } = await supabase.from("email_events").insert([
-            {
-                event_type: "open",
-                tracking_id: openId,
-                ip_address: ip,
-                user_agent: userAgent,
-                user_id: userId,
-                is_real_open: isReal,
-                created_at: new Date().toISOString(),
-            },
-        ]);
+        // dupli open u poslednjih 2 minuta?
+        const { data: existing } = await supabase
+            .from("email_events")
+            .select("created_at")
+            .eq("tracking_id", openId)
+            .order("created_at", { ascending: false })
+            .limit(1);
 
-        if (error)
-            console.error("❌ Greška pri logovanju open eventa:", error.message);
+        if (existing?.length && Date.now() - new Date(existing[0].created_at).getTime() < 120000) {
+            console.log("⚠️ Ignorišem dupli open:", openId);
+        } else {
+            const { error } = await supabase.from("email_events").insert([
+                {
+                    event_type: "open",
+                    tracking_id: openId,
+                    ip_address: ip,
+                    user_agent: userAgent,
+                    user_id: userId,
+                    is_real_open: isReal,
+                    created_at: new Date().toISOString(),
+                },
+            ]);
 
-        // ✅ Vrati transparentni 1x1 PNG
+            if (error) console.error("❌ Greška pri logovanju open eventa:", error.message);
+        }
+
+        // vraćamo transparentni piksel
         const pixel = Buffer.from(
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=",
             "base64"
@@ -536,6 +516,42 @@ app.get("/track/open/:id.png", async (req, res) => {
         res.status(500).send("Tracking error");
     }
 });
+
+// ✅ CLICK TRACKING
+app.get("/track/click/:trackingId/:encodedUrl", async (req, res) => {
+    try {
+        const { trackingId, encodedUrl } = req.params;
+        const decodedUrl = Buffer.from(encodedUrl, "base64").toString("utf8");
+        const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+        const userAgent = req.headers["user-agent"] || "unknown";
+
+        const { data: msg } = await supabase
+            .from("outreach_messages")
+            .select("user_id")
+            .eq("tracking_id", trackingId)
+            .single();
+
+        const userId = msg?.user_id || null;
+
+        await supabase.from("email_events").insert([
+            {
+                event_type: "click",
+                tracking_id: trackingId,
+                ip_address: ip,
+                user_agent: userAgent,
+                user_id: userId,
+                created_at: new Date().toISOString(),
+            },
+        ]);
+
+        console.log(`✅ Klik zabeležen (${trackingId}) → ${decodedUrl}`);
+        res.redirect(decodedUrl);
+    } catch (err) {
+        console.error("❌ Click tracking error:", err);
+        res.status(500).send("Click tracking error");
+    }
+});
+
 
 
 

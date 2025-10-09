@@ -39,17 +39,19 @@
           <td class="py-3 px-4">{{ msg.recipient || "—" }}</td>
           <td class="py-3 px-4">{{ msg.subject || "No subject" }}</td>
           <td class="py-3 px-4">
-              <span
-                  v-if="openedStatus[msg.tracking_id]?.real"
-                  class="text-green-400 font-medium"
-              >👁 Opened</span>
+              <span v-if="openedStatus[msg.tracking_id]?.real" class="text-green-400 font-medium">
+                🟢 Opened
+              </span>
 
-            <span
-                v-else-if="openedStatus[msg.tracking_id]?.probable"
-                class="text-yellow-400 font-medium"
-            >👁 Probably opened</span>
+              <span v-else-if="openedStatus[msg.tracking_id]?.probable" class="text-yellow-400 font-medium">
+                🟡 Probably Opened
+              </span>
 
-            <span v-else class="text-gray-400">🕓 Not opened</span>
+              <span v-if="openedStatus[msg.tracking_id]?.clicked" class="text-blue-400 font-medium">
+                🔗 Clicked
+              </span>
+
+              <span v-else class="text-gray-400">🕓 Not opened</span>
 
           </td>
           <td class="py-3 px-4 text-gray-400 text-sm">
