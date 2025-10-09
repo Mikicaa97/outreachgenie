@@ -214,6 +214,7 @@ async function saveUserGmailToken(userId, tokens, gmailEmail) {
 }
 
 // ---------- Gmail: auth-url (generiši URL sa state=userId) ----------
+// ---------- Gmail: auth-url (generiši URL sa state=userId) ----------
 app.post("/api/gmail/auth-url", async (req, res) => {
     try {
         const { userId } = req.body;
@@ -223,21 +224,24 @@ app.post("/api/gmail/auth-url", async (req, res) => {
 
         const url = oauth2Client.generateAuthUrl({
             access_type: "offline",
-            prompt: "consent",
+            prompt: "consent", // traži refresh_token čak i ako je ranije dat
             scope: [
                 "https://www.googleapis.com/auth/gmail.send",
+                "https://www.googleapis.com/auth/gmail.readonly",
                 "https://www.googleapis.com/auth/userinfo.email",
+                "https://www.googleapis.com/auth/gmail.modify", // opcionalno — kasnije možeš obeležiti mejlove kao "pročitane"
             ],
             state,
         });
 
-        console.log("👉 Gmail Auth URL generisan");
+        console.log("✅ Gmail Auth URL (send + read) generisan");
         res.json({ url });
     } catch (err) {
         console.error("❌ /api/gmail/auth-url error:", err);
         res.status(500).json({ error: "Neuspelo generisanje auth URL-a" });
     }
 });
+
 
 // ---------- Gmail: callback (snimi token + email) ----------
 app.get("/auth/callback", async (req, res) => {
@@ -435,12 +439,20 @@ app.get("/api/email-events/status", async (req, res) => {
         const status = {};
         for (const row of data) {
             if (!status[row.tracking_id]) status[row.tracking_id] = {};
+
             if (row.event_type === "open") {
                 if (row.is_real_open) status[row.tracking_id].real = true;
                 else status[row.tracking_id].probable = true;
             }
+
             if (row.event_type === "click") status[row.tracking_id].clicked = true;
+
+            // 🟩 Novi deo – dodaj ispod
+            if (row.event_type === "reply") {
+                status[row.tracking_id].replied = true;
+            }
         }
+
 
         res.json({ opened: status });
     } catch (err) {
@@ -448,6 +460,86 @@ app.get("/api/email-events/status", async (req, res) => {
         res.status(500).json({ error: "Greška pri čitanju statusa" });
     }
 });
+
+// ---------- Gmail: Reply Tracking ----------
+app.get("/api/gmail/check-replies", async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        if (!userId) return res.status(400).json({ error: "Nedostaje userId" });
+
+        // 🔹 Preuzmi korisnikov Gmail token iz baze
+        const { data: profile, error } = await supabase
+            .from("user_profiles")
+            .select("gmail_token, gmail_email")
+            .eq("id", userId)
+            .single();
+
+        if (error || !profile?.gmail_token)
+            return res.status(400).json({ error: "Korisnik nema povezan Gmail" });
+
+        const oauth2Client = new google.auth.OAuth2(
+            process.env.GMAIL_CLIENT_ID,
+            process.env.GMAIL_CLIENT_SECRET,
+            process.env.GMAIL_REDIRECT_URI
+        );
+        oauth2Client.setCredentials(profile.gmail_token);
+        const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+
+        // 🔹 Uzimamo listu threadova iz inboxa
+        const threadsResponse = await gmail.users.threads.list({
+            userId: "me",
+            labelIds: ["INBOX"],
+            q: "in:inbox newer_than:7d", // samo zadnjih 7 dana
+            maxResults: 50,
+        });
+
+        if (!threadsResponse.data.threads) return res.json({ found: 0 });
+
+        let replyCount = 0;
+
+        for (const thread of threadsResponse.data.threads) {
+            const threadData = await gmail.users.threads.get({
+                userId: "me",
+                id: thread.id,
+            });
+
+            const messages = threadData.data.messages || [];
+            if (messages.length < 2) continue; // ako ima samo tvoj mejl, nema odgovora
+
+            const lastMsg = messages[messages.length - 1];
+            const headers = lastMsg.payload?.headers || [];
+
+            const fromHeader = headers.find((h) => h.name === "From")?.value || "";
+            const subjectHeader = headers.find((h) => h.name === "Subject")?.value || "";
+
+            // Ako pošiljalac nije tvoj Gmail → znači da je odgovor
+            if (!fromHeader.includes(profile.gmail_email)) {
+                const replyEvent = {
+                    event_type: "reply",
+                    user_id: userId,
+                    ip_address: "gmail",
+                    user_agent: "gmail_api",
+                    created_at: new Date().toISOString(),
+                };
+
+                const { error: insertErr } = await supabase
+                    .from("email_events")
+                    .insert([replyEvent]);
+
+                if (!insertErr) {
+                    replyCount++;
+                    console.log(`💬 Reply detektovan: ${subjectHeader}`);
+                }
+            }
+        }
+
+        res.json({ replies_found: replyCount });
+    } catch (err) {
+        console.error("❌ /api/gmail/check-replies error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 
 // ---------- Email Tracking (Open + Click) ----------
