@@ -342,6 +342,8 @@ async function getAuthedClientForUser(userId) {
 // ---------- Gmail: slanje mejla ----------
 app.post("/api/gmail/send", async (req, res) => {
     try {
+        console.log("📤 Primljen zahtev za slanje mejla:", req.body);
+
         const { userId, to, subject, body } = req.body;
 
         if (!userId || !to || !subject || !body) {
@@ -355,11 +357,11 @@ app.post("/api/gmail/send", async (req, res) => {
             return res.status(400).json({ error: "Korisnik nema povezan Gmail nalog" });
         }
 
-        // generiši unique ID za praćenje
+        // ✅ 1. generiši tracking ID i URL-ove
         const trackingId = crypto.randomUUID();
         const trackingPixelUrl = `https://outreachgenie-production.up.railway.app/track/open/${trackingId}.png`;
 
-        // zameni sve linkove u tekstu sa tracking verzijom
+        // ✅ 2. zameni sve linkove u tekstu sa tracking verzijom
         const trackedBody = body.replace(
             /(https?:\/\/[^\s]+)/g,
             (url) => {
@@ -368,15 +370,30 @@ app.post("/api/gmail/send", async (req, res) => {
             }
         );
 
-        // formiraj HTML telo mejla
-                const htmlBody = `
-          <div>
-            ${trackedBody.replace(/\n/g, "<br>")}
-            <img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" />
-          </div>
-        `;
+        // ✅ 3. sigurno čitanje teksta poruke
+        const emailBody = req.body?.body ?? "No content";
 
+        // ✅ 4. footer
+        const footer = `
+      <div style="font-size:12px;color:#888;margin-top:30px;">
+        <hr style="border:none;border-top:1px solid #333;margin:10px 0;" />
+        <p>
+          You received this email via <strong>OutreachGenie</strong>.<br/>
+          <a href="https://outreachgenie.com/unsubscribe" style="color:#00C786;">Unsubscribe</a>
+        </p>
+      </div>
+    `;
 
+        // ✅ 5. napravi HTML telo sa tracking pikselom i footerom
+        const htmlBody = `
+      <div>
+        ${trackedBody.replace(/\n/g, "<br>")}
+        <img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" />
+        ${footer}
+      </div>
+    `;
+
+        // ✅ 6. formiraj MIME mejl
         const message = [
             `From: ${gmailEmail}`,
             `To: ${to}`,
@@ -386,7 +403,7 @@ app.post("/api/gmail/send", async (req, res) => {
             htmlBody,
         ].join("\n");
 
-        // opcionalno sačuvaj trackingId u outreach_messages
+        // ✅ 7. snimi tracking_id u outreach_messages (poslednji generisani)
         const { data: lastMessage } = await supabase
             .from("outreach_messages")
             .select("id")
@@ -402,8 +419,7 @@ app.post("/api/gmail/send", async (req, res) => {
                 .eq("id", lastMessage.id);
         }
 
-
-
+        // ✅ 8. pošalji mejl preko Gmail API-ja
         const encodedMessage = Buffer.from(message, "utf-8")
             .toString("base64")
             .replace(/\+/g, "-")
@@ -415,12 +431,14 @@ app.post("/api/gmail/send", async (req, res) => {
             requestBody: { raw: encodedMessage },
         });
 
-        res.json({ success: true, result });
+        console.log(`✅ Email poslat za ${to} (tracking ID: ${trackingId})`);
+        res.json({ success: true, trackingId, result });
     } catch (err) {
         console.error("❌ Greška pri slanju Gmail-a:", err?.response?.data || err.message || err);
         res.status(500).json({ error: err?.response?.data || err.message || "Gmail send error" });
     }
 });
+
 
 
 // ---------- Contacts ----------
@@ -464,6 +482,68 @@ app.get("/api/campaigns", async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
 });
+
+// ---------- Campaign Sending ----------
+app.post("/api/campaigns/send", async (req, res) => {
+    try {
+        const { campaignId, userId, subject, body } = req.body;
+
+        if (!campaignId || !userId || !subject || !body) {
+            return res.status(400).json({ error: "Missing data" });
+        }
+
+        // 🔹 Učitaj sve kontakte u kampanji
+        const { data: links, error: linkErr } = await supabase
+            .from("campaign_contacts")
+            .select("contact_id")
+            .eq("campaign_id", campaignId);
+
+        if (linkErr) throw linkErr;
+
+        // 🔹 Učitaj kontakte
+        const ids = links.map((l) => l.contact_id);
+        const { data: contacts, error: contactErr } = await supabase
+            .from("contacts")
+            .select("email, first_name, last_name")
+            .in("id", ids);
+
+        if (contactErr) throw contactErr;
+
+        // 🔹 Pošalji mejlove (ovde koristimo Gmail API endpoint koji već imaš)
+        for (const contact of contacts) {
+            const personalizedBody = body
+                .replace("{{first_name}}", contact.first_name || "")
+                .replace("{{last_name}}", contact.last_name || "");
+
+            await fetch("https://outreachgenie-production.up.railway.app/api/gmail/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId,
+                    to: contact.email,
+                    subject,
+                    body: personalizedBody,
+                }),
+            });
+
+            // 🔹 Zapiši status u bazu
+            await supabase.from("campaign_contacts").update({
+                sent: true,
+                sent_at: new Date().toISOString(),
+                subject,
+                body: personalizedBody
+            })
+                .eq("campaign_id", campaignId)
+                .eq("contact_id", links.find(l => l.contact_id === contact.id)?.contact_id);
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error("❌ /api/campaigns/send error:", err.message);
+        res.status(500).json({ error: "Campaign send failed" });
+    }
+});
+
 
 app.post("/api/campaigns", async (req, res) => {
     const { userId, name, description } = req.body;
@@ -738,24 +818,3 @@ console.log(
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
-
-
-
-const footer = `
-  <div style="font-size:12px;color:#888;margin-top:30px;">
-    <hr style="border:none;border-top:1px solid #333;margin:10px 0;" />
-    <p>
-      You received this email via <strong>OutreachGenie</strong>.  
-      <a href="https://outreachgenie.com/unsubscribe" style="color:#00C786;">Unsubscribe</a>
-    </p>
-  </div>
-`;
-
-const htmlBody = `
-  <div>
-    ${body.replace(/\n/g, "<br>")}
-    <img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" />
-    ${footer}
-  </div>
-`;
-

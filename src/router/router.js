@@ -64,6 +64,11 @@ const routes = [
                 path: '/campaigns',
                 name: 'Campaigns',
                 component: () => import('@/pages/Campaigns.vue')
+            },
+            {
+                path: '/campaigns/send',
+                name: 'CampaignSend',
+                component: () => import('@/pages/CampaignSend.vue')
             }
         ]
     },

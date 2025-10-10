@@ -85,6 +85,8 @@
         <button @click="navigateTo('contacts')" class="px-3 py-1 rounded hover:bg-gray-800">Contacts</button>
         <button @click="navigateTo('campaigns')" class="px-3 py-1 rounded hover:bg-gray-800">Campaigns</button>
 
+        <RouterLink to="/campaigns/send" class="px-3 py-1 rounded hover:bg-gray-800">Send Campaign</RouterLink>
+
 
         <button
             @click="navigateTo('profile')"
@@ -139,6 +141,9 @@
 
           <button @click="navigateTo('contacts')" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">Contacts</button>
           <button @click="navigateTo('campaigns')" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">Campaigns</button>
+
+          <RouterLink to="/campaigns/send" class="hover:text-purple-300 text-gray-300">Send Campaign</RouterLink>
+
 
           <button @click="navigateTo('profile'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_profile') }}</button>
           <SubscribeButton />
