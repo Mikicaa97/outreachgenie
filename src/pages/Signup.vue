@@ -56,15 +56,37 @@
             :placeholder="t('signup_email')"
             class="w-full p-2 border border-gray-600 rounded bg-gray-900/80 text-white placeholder-gray-400"
         />
+
         <input
             v-model="password"
             type="password"
             :placeholder="t('signup_password')"
             class="w-full p-2 border border-gray-600 rounded bg-gray-900/80 text-white placeholder-gray-400"
         />
+
+        <div class="flex items-center mt-4 text-sm text-gray-400">
+          <input
+              type="checkbox"
+              v-model="agreed"
+              class="mr-2 cursor-pointer accent-purple-600"
+              required
+          />
+          <span>
+    {{ t('signup_terms') }}
+    <RouterLink to="/terms" class="text-[#00C786] underline">{{ t('terms_title') }}</RouterLink>
+    {{ t('signup_and') }}
+    <RouterLink to="/privacy" class="text-[#00C786] underline">{{ t('privacy_title') }}</RouterLink>.
+  </span>
+        </div>
+
+
         <button
             @click="register"
-            class="bg-purple-600 w-full py-2 rounded font-semibold hover:bg-purple-700 transition cursor-pointer"
+            :disabled="!agreed"
+            :class="[
+    'w-full py-2 rounded font-semibold transition',
+    agreed ? 'bg-purple-600 hover:bg-purple-700 cursor-pointer' : 'bg-purple-600 opacity-50 cursor-not-allowed'
+  ]"
         >
           {{ t('signup_button') }}
         </button>
@@ -99,6 +121,8 @@ const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
+const agreed = ref(false)
+
 // polja
 const email = ref('')
 const password = ref('')
@@ -116,6 +140,11 @@ const changeLang = (lang) => {
 const register = async () => {
   errorMsg.value = ''
   successMsg.value = ''
+
+  if (!agreed.value) {
+    errorMsg.value = t('signup_error_terms') || 'Please accept the Terms of Service and Privacy Policy.'
+    return
+  }
 
   if (!email.value || !password.value || !firstName.value || !lastName.value) {
     errorMsg.value = t('signup_error_fields') || 'Please fill in all fields.'

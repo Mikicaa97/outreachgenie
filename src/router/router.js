@@ -55,6 +55,16 @@ const routes = [
                 component: () => import('@/pages/MyEmails.vue'),
                 meta: { requiresAuth: true }
             },
+            {
+                path: '/contacts',
+                name: 'Contacts',
+                component: () => import('@/pages/Contacts.vue')
+            },
+            {
+                path: '/campaigns',
+                name: 'Campaigns',
+                component: () => import('@/pages/Campaigns.vue')
+            }
         ]
     },
     { path: '/success', name: 'Success', component: Success },

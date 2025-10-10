@@ -82,6 +82,10 @@
           {{ t('header_myemails') }}
         </button>
 
+        <button @click="navigateTo('contacts')" class="px-3 py-1 rounded hover:bg-gray-800">Contacts</button>
+        <button @click="navigateTo('campaigns')" class="px-3 py-1 rounded hover:bg-gray-800">Campaigns</button>
+
+
         <button
             @click="navigateTo('profile')"
             class="px-3 py-1 rounded hover:bg-gray-800 transition"
@@ -132,6 +136,10 @@
           >
             {{ t('header_myemails') }}
           </button>
+
+          <button @click="navigateTo('contacts')" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">Contacts</button>
+          <button @click="navigateTo('campaigns')" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">Campaigns</button>
+
           <button @click="navigateTo('profile'); open = false" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_profile') }}</button>
           <SubscribeButton />
           <button @click="logout" class="w-full text-left px-3 py-2 rounded hover:bg-gray-800">{{ t('header_logout') }}</button>
@@ -178,7 +186,14 @@ function navigateTo(view) {
     router.push('/dashboard')
   } else if (view === 'emails') {
     router.push('/my-emails')
-  } else if (view === 'profile') {
+  }
+  else if (view === 'contacts') {
+    router.push('/contacts')
+  }
+  else if (view === 'campaigns') {
+    router.push('/campaigns')
+  }
+  else if (view === 'profile') {
     router.push('/dashboard/profile')
   }
 }

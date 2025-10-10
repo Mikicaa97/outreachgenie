@@ -423,6 +423,62 @@ app.post("/api/gmail/send", async (req, res) => {
 });
 
 
+// ---------- Contacts ----------
+app.get("/api/contacts", async (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ error: "Missing userId" });
+
+    const { data, error } = await supabase
+        .from("contacts")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.post("/api/contacts", async (req, res) => {
+    const { userId, first_name, last_name, email, company, tags } = req.body;
+    if (!userId || !email) return res.status(400).json({ error: "Missing data" });
+
+    const { error } = await supabase.from("contacts").insert([
+        { user_id: userId, first_name, last_name, email, company, tags },
+    ]);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ success: true });
+});
+
+// ---------- Campaigns ----------
+app.get("/api/campaigns", async (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ error: "Missing userId" });
+
+    const { data, error } = await supabase
+        .from("campaigns")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.post("/api/campaigns", async (req, res) => {
+    const { userId, name, description } = req.body;
+    if (!userId || !name) return res.status(400).json({ error: "Missing data" });
+
+    const { error } = await supabase
+        .from("campaigns")
+        .insert([{ user_id: userId, name, description }]);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ success: true });
+});
+
+
+
 // ---------- Email events: status po useru ----------
 app.get("/api/email-events/status", async (req, res) => {
     try {
@@ -460,6 +516,7 @@ app.get("/api/email-events/status", async (req, res) => {
         res.status(500).json({ error: "Greška pri čitanju statusa" });
     }
 });
+
 
 // ---------- Gmail: Reply Tracking ----------
 app.get("/api/gmail/check-replies", async (req, res) => {
@@ -681,3 +738,24 @@ console.log(
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
+
+
+const footer = `
+  <div style="font-size:12px;color:#888;margin-top:30px;">
+    <hr style="border:none;border-top:1px solid #333;margin:10px 0;" />
+    <p>
+      You received this email via <strong>OutreachGenie</strong>.  
+      <a href="https://outreachgenie.com/unsubscribe" style="color:#00C786;">Unsubscribe</a>
+    </p>
+  </div>
+`;
+
+const htmlBody = `
+  <div>
+    ${body.replace(/\n/g, "<br>")}
+    <img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" />
+    ${footer}
+  </div>
+`;
+

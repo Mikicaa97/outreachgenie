@@ -5,14 +5,12 @@
       <p class="text-center sm:text-left">
         {{t('footer_rights')}} Development <a href="https://weboro-site.vercel.app/" class="text-yellow-400">Weboro</a>
       </p>
-
       <nav class="flex flex-wrap gap-4 justify-center">
         <RouterLink to="/privacy" class="hover:text-white transition">Privacy Policy</RouterLink>
         <RouterLink to="/terms" class="hover:text-white transition">Terms of Service</RouterLink>
         <RouterLink to="/cookies" class="hover:text-white transition">Cookies Policy</RouterLink>
         <RouterLink to="/contact" class="hover:text-white transition">Contact</RouterLink>
       </nav>
-
     </div>
   </footer>
 </template>
