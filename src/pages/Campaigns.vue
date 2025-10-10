@@ -57,11 +57,18 @@
               ➕ Add Contacts
             </button>
             <button
+                @click="openViewContactsModal(c)"
+                class="bg-yellow-600 px-3 py-1 rounded text-sm hover:bg-yellow-500"
+            >
+              👁️ View Contacts
+            </button>
+            <button
                 @click="sendCampaign(c)"
                 class="bg-green-600 px-3 py-1 rounded text-sm hover:bg-green-500"
             >
               🚀 Send
             </button>
+
           </td>
         </tr>
         </tbody>
@@ -108,6 +115,47 @@
           </button>
         </div>
       </div>
+      <!-- ✅ Modal: View Contacts -->
+      <div
+          v-if="showViewModal"
+          class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+      >
+        <div class="bg-gray-900 rounded-lg p-6 w-[90%] max-w-lg">
+          <h2 class="text-xl font-bold mb-4">
+            Contacts in {{ selectedCampaign?.name }}
+          </h2>
+
+          <div v-if="viewContacts.length === 0" class="text-gray-400">
+            No contacts linked yet.
+          </div>
+
+          <ul class="max-h-64 overflow-y-auto divide-y divide-gray-700">
+            <li
+                v-for="contact in viewContacts"
+                :key="contact.id"
+                class="flex items-center justify-between py-2 px-2"
+            >
+              <span>{{ contact.first_name }} {{ contact.last_name }} ({{ contact.email }})</span>
+              <button
+                  @click="removeContactFromCampaign(contact.id)"
+                  class="bg-red-600 hover:bg-red-500 text-xs px-2 py-1 rounded"
+              >
+                🗑 Remove
+              </button>
+            </li>
+          </ul>
+
+          <div class="flex justify-end mt-4">
+            <button
+                @click="closeViewModal"
+                class="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 </template>
@@ -216,4 +264,48 @@ const sendCampaign = async (campaign) => {
 };
 
 onMounted(loadCampaigns);
+
+const showViewModal = ref(false)
+const viewContacts = ref([])
+
+// ✅ Otvori modal za prikaz kontakata
+const openViewContactsModal = async (campaign) => {
+  selectedCampaign.value = campaign
+  showViewModal.value = true
+
+  const { data, error } = await supabase
+      .from('campaign_contacts')
+      .select('contacts(id, first_name, last_name, email)')
+      .eq('campaign_id', campaign.id)
+      .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('❌ Error loading contacts:', error.message)
+    viewContacts.value = []
+  } else {
+    viewContacts.value = data.map((d) => d.contacts)
+  }
+}
+
+// ✅ Ukloni kontakt iz kampanje
+const removeContactFromCampaign = async (contactId) => {
+  if (!selectedCampaign.value) return
+  const { error } = await supabase
+      .from('campaign_contacts')
+      .delete()
+      .eq('campaign_id', selectedCampaign.value.id)
+      .eq('contact_id', contactId)
+
+  if (error) {
+    alert('❌ Error removing contact: ' + error.message)
+  } else {
+    viewContacts.value = viewContacts.value.filter((c) => c.id !== contactId)
+  }
+}
+
+// ✅ Zatvori modal
+const closeViewModal = () => {
+  showViewModal.value = false
+}
+
 </script>
